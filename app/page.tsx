@@ -1,65 +1,355 @@
-import Image from "next/image";
+const modules = [
+  {
+    label: "01",
+    title: "ATS Resume Checker",
+    description:
+      "Compare your resume with a target job description, identify missing keywords, and receive specific resume improvement suggestions.",
+  },
+  {
+    label: "02",
+    title: "Career Path Explorer",
+    description:
+      "Use your profile, skills, interests, and resume analysis to discover realistic career paths built for students.",
+  },
+  {
+    label: "03",
+    title: "Skill Gap Roadmap",
+    description:
+      "Turn a selected role into a clear five-step learning plan with practical tasks, estimated time, and progress tracking.",
+  },
+  {
+    label: "04",
+    title: "Mock Interview Coach",
+    description:
+      "Practice role-based interview questions and receive structured feedback that improves confidence and clarity.",
+  },
+];
+
+const journeySteps = [
+  "Upload or paste your resume",
+  "Compare against a job description",
+  "Choose a realistic target role",
+  "Build a skill roadmap",
+  "Practice interview answers",
+];
+
+const studentSignals = [
+  "Limited experience does not mean no value",
+  "Coursework and projects can become stronger resume proof",
+  "Career direction should be realistic, not randomly optimistic",
+];
+
+const trustPrinciples = [
+  "Full resume and job description text are not saved by default.",
+  "AI feedback explains the why behind each recommendation.",
+  "Students can delete saved Pathway AI data from settings.",
+];
+
+function PathwayLogo({ showText = true }: { showText?: boolean }) {
+  return (
+    <div className="brand-mark" aria-label="Pathway AI">
+      <svg
+        className="brand-symbol"
+        width="96"
+        height="56"
+        viewBox="0 0 96 56"
+        role="img"
+        aria-hidden="true"
+      >
+        <path
+          d="M18 42 L38 28 L58 18 L78 6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+        <circle cx="18" cy="42" r="6" />
+        <circle cx="38" cy="28" r="6" />
+        <circle cx="58" cy="18" r="6" />
+        <circle cx="78" cy="6" r="10" />
+      </svg>
+      {showText ? <span className="brand-name">Pathway AI</span> : null}
+    </div>
+  );
+}
+
+function PathwayLoader() {
+  return (
+    <svg
+      className="pathway-loader"
+      aria-label="Pathway AI loading animation"
+      role="img"
+      viewBox="0 0 64 64"
+    >
+      <g className="pathway-loader-mark">
+        <path
+          className="loader-path-line"
+          d="M10 48 L26 36 L42 24 L56 10"
+          fill="none"
+          stroke="#2f80ff"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="3"
+          pathLength="1"
+        />
+
+        <circle
+          className="loader-dot loader-dot-one"
+          cx="10"
+          cy="48"
+          r="5"
+          fill="#ffffff"
+          stroke="#2f80ff"
+          strokeWidth="3"
+        />
+        <circle
+          className="loader-dot loader-dot-two"
+          cx="26"
+          cy="36"
+          r="5"
+          fill="#ffffff"
+          stroke="#2f80ff"
+          strokeWidth="3"
+        />
+        <circle
+          className="loader-dot loader-dot-three"
+          cx="42"
+          cy="24"
+          r="5"
+          fill="#ffffff"
+          stroke="#2f80ff"
+          strokeWidth="3"
+        />
+        <circle
+          className="loader-dot loader-dot-four"
+          cx="56"
+          cy="10"
+          r="7"
+          fill="#60a5fa"
+          stroke="#60a5fa"
+          strokeWidth="3"
+        />
+      </g>
+    </svg>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="page-shell">
+      <header className="site-header" aria-label="Pathway AI main navigation">
+        <a href="#top" className="logo-link" aria-label="Pathway AI homepage">
+          <PathwayLogo />
+        </a>
+
+        <nav className="desktop-nav" aria-label="Primary navigation">
+          <a href="#problem">Problem</a>
+          <a href="#journey">Journey</a>
+          <a href="#modules">Modules</a>
+          <a href="#privacy">Privacy</a>
+        </nav>
+
+        <a href="/dashboard" className="header-action">
+          Get started
+        </a>
+      </header>
+
+      <section id="top" className="hero-section" aria-labelledby="hero-title">
+        <div className="hero-eyebrow">
+          Student career readiness, connected in one place
+        </div>
+
+        <h1 id="hero-title">
+          Go from career confusion to a clear, confident plan.
+        </h1>
+
+        <p className="hero-copy">
+          Pathway AI helps students improve their resume, discover realistic
+          career paths, close skill gaps, and practice interviews before the
+          real opportunity arrives.
+        </p>
+
+        <div className="hero-actions" aria-label="Landing page actions">
+          <a href="/dashboard" className="primary-action">
+            Open dashboard
+          </a>
+          <a href="#modules" className="secondary-action">
+            Explore modules
+          </a>
+        </div>
+
+        <div className="hero-note">
+          Built for students with limited experience who need direction,
+          preparation, and confidence.
+        </div>
+      </section>
+
+      <section className="product-preview" aria-label="Pathway AI dashboard preview">
+        <div className="preview-window">
+          <div className="preview-window-top">
+            <div className="window-controls" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+            <span className="preview-url">pathway-ai.vercel.app/dashboard</span>
+          </div>
+
+          <div className="preview-content">
+            <aside className="preview-sidebar">
+              <PathwayLogo showText={false} />
+              <div className="sidebar-pill active">Dashboard</div>
+              <div className="sidebar-pill">Resume</div>
+              <div className="sidebar-pill">Career</div>
+              <div className="sidebar-pill">Roadmap</div>
+              <div className="sidebar-pill">Interview</div>
+            </aside>
+
+            <div className="preview-main">
+              <div className="preview-heading-row">
+                <div>
+                  <p className="preview-kicker">Career workspace</p>
+                  <h2>Your path, organized</h2>
+                  <p>
+                    Resume insights, role direction, skill planning, and
+                    interview practice in one place.
+                  </p>
+                </div>
+
+                <div className="score-card" aria-label="Resume insights status">
+                  <span>Ready</span>
+                  <p>Resume insights</p>
+                </div>
+              </div>
+
+              <div className="journey-track" aria-label="Career readiness journey">
+                {journeySteps.map((step, index) => (
+                  <div className="journey-dot" key={step}>
+                    <span>{index + 1}</span>
+                    <p>{step}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="preview-grid">
+                {modules.map((module) => (
+                  <article className="preview-card" key={module.title}>
+                    <span>{module.label}</span>
+                    <h3>{module.title}</h3>
+                    <p>{module.description}</p>
+                  </article>
+                ))}
+              </div>
+
+              <div className="loading-card">
+                <div>
+                  <span className="loading-label">Loading state preview</span>
+                  <p>
+                    Pathway AI uses this branded loading state while resume
+                    feedback, roadmaps, career suggestions, or interview
+                    coaching are being generated.
+                  </p>
+                </div>
+                <PathwayLoader />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="problem" className="content-section">
+        <div className="section-label">The problem</div>
+        <div className="section-split">
+          <h2>Career readiness is scattered across too many tools.</h2>
+          <div className="section-copy-stack">
+            <p>
+              Students often jump between resume checkers, job boards, skill
+              tutorials, and interview prep tools. Pathway AI connects those
+              steps into one guided workspace so students know what to fix, what
+              to learn, and how to prepare next.
+            </p>
+            <div className="signal-list" aria-label="Student support principles">
+              {studentSignals.map((signal) => (
+                <div className="signal-item" key={signal}>
+                  <span />
+                  <p>{signal}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="journey" className="content-section">
+        <div className="section-label">The student journey</div>
+        <div className="journey-cards">
+          {journeySteps.map((step, index) => (
+            <article className="journey-card" key={step}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <h3>{step}</h3>
+              <p>
+                {index === 0 &&
+                  "Students begin with the resume they already have, whether it is polished or still in progress."}
+                {index === 1 &&
+                  "The resume is compared against a real role so the feedback is specific, not generic."}
+                {index === 2 &&
+                  "Pathway AI recommends realistic paths based on the student’s profile and current skills."}
+                {index === 3 &&
+                  "The selected role becomes a focused learning plan with practical next steps."}
+                {index === 4 &&
+                  "Students practice explaining their experience before entering a real interview."}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="modules" className="content-section">
+        <div className="section-label">Core modules</div>
+        <div className="section-intro">
+          <h2>Four focused tools, one connected student journey.</h2>
+          <p>
+            Each module should eventually share context with the next, so the
+            student is not starting over every time they move from resume
+            feedback to interviews.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="module-grid">
+          {modules.map((module) => (
+            <article className="module-card" key={module.title}>
+              <span>{module.label}</span>
+              <h3>{module.title}</h3>
+              <p>{module.description}</p>
+              <a
+                className="module-status"
+                href={module.label === "01" ? "/resume-checker" : "/dashboard"}
+              >
+                {module.label === "01" ? "Working MVP" : "Planned module"}
+              </a>
+            </article>
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section id="privacy" className="content-section privacy-section">
+        <div>
+          <div className="section-label">Responsible AI</div>
+          <h2>Helpful guidance without unnecessary data storage.</h2>
+        </div>
+        <div className="trust-list">
+          {trustPrinciples.map((principle) => (
+            <div className="trust-item" key={principle}>
+              <span>OK</span>
+              <p>{principle}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="site-footer">
+        <PathwayLogo />
+        <p>A one stop shop to your career goals.</p>
+      </footer>
+    </main>
   );
 }

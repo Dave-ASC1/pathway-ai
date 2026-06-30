@@ -1,31 +1,29 @@
 # Pathway AI
 
+**Live app:** https://pathway-aiapp.vercel.app
+
 Pathway AI is a student-first career readiness platform that helps students improve resumes, discover realistic career paths, build skill roadmaps, and prepare for interviews.
 
-This repository contains the MVP implementation for the project submission. It includes a polished landing page, a dashboard workspace, and a working local ATS-style resume checker.
+This repository contains the MVP implementation for the IST 440W capstone project. It includes a polished landing page, a dashboard workspace, and a working ATS-style resume checker powered by Claude AI with a local fallback.
 
-## Implemented MVP Features
+## Implemented Features
 
 - Public landing page with Pathway AI branding and module overview.
 - Dashboard route at `/dashboard`.
-- Working resume checker route at `/resume-checker`.
-- Resume and target job description text inputs.
-- Local ATS-style match score.
+- Resume checker at `/resume-checker` — AI-powered via Claude API with local keyword-matching fallback.
 - Matched keyword and missing keyword detection.
 - Resume section checks for education, projects, skills, experience, and impact.
 - Student-focused strengths and improvement recommendations.
+- Screenshots of all working screens in `public/screenshots/`.
 - Responsive design for desktop and mobile.
-- No external API key required for the MVP.
 
-## Planned Future Features
+## Planned Features
 
-- User authentication.
-- Saved student profiles and resume results.
-- AI-generated feedback through a secure server route.
+- User authentication (Clerk).
+- Saved student profiles and resume history (NeonDB + Prisma).
 - Career Path Explorer.
 - Skill Gap Roadmap.
 - Mock Interview Coach.
-- Resume PDF/DOCX upload and parsing.
 
 ## Tech Stack
 
@@ -33,7 +31,8 @@ This repository contains the MVP implementation for the project submission. It i
 - React 19
 - TypeScript
 - Tailwind CSS 4
-- Local deterministic resume analysis for the MVP
+- shadcn/ui
+- Claude API (`@anthropic-ai/sdk`) — resume checker AI analysis
 
 ## Getting Started
 
@@ -79,16 +78,16 @@ npm run lint
 
 ## How the Resume Checker Works
 
-The resume checker runs locally in the browser:
+1. The student pastes resume text and a target job description.
+2. The app POSTs to `/api/analyze-resume` (server-side route).
+3. If `ANTHROPIC_API_KEY` is set, Claude AI analyzes the resume and returns structured feedback.
+4. If no API key is present or the call fails, a local keyword-matching fallback runs automatically.
+5. Results include: match score (0–100), matched keywords, missing keywords, section checks, strengths, and improvement recommendations.
 
-1. The student pastes resume text.
-2. The student pastes a target job description.
-3. The checker extracts important keywords from the job description.
-4. The checker compares those keywords against the resume.
-5. It calculates a match score using keyword coverage and resume section completeness.
-6. It returns matched keywords, missing keywords, section checks, strengths, and recommended improvements.
-
-Because this MVP does not require an external AI API, it can run on another computer immediately after cloning and installing dependencies.
+To enable Claude AI locally, add to `.env.local`:
+```
+ANTHROPIC_API_KEY=your_key_here
+```
 
 ## Documentation
 
@@ -111,45 +110,18 @@ The project management document includes:
 - Critical Path Analysis
 - PERT chart
 
-## Screenshots to Capture for Submission
+## Screenshots
 
-After running the app locally, capture these screenshots:
+Screenshots of all working screens are saved in `public/screenshots/`:
 
-1. Landing page at `/`
-2. Dashboard at `/dashboard`
-3. Resume checker input state at `/resume-checker`
-4. Resume checker result state after clicking `Analyze resume`
+- `landing-page.png`
+- `dashboard.png`
+- `resume-checker-input.png`
+- `resume-checker-results.png`
 
-Suggested folder for screenshots:
+## GitHub Repository
 
-```text
-public/screenshots/
-```
-
-## GitHub Submission Steps
-
-1. Create a new public GitHub repository named `pathway-ai`.
-2. Add the GitHub remote:
-
-```bash
-git remote add origin https://github.com/YOUR-USERNAME/pathway-ai.git
-```
-
-3. Commit the project:
-
-```bash
-git add .
-git commit -m "Build Pathway AI dashboard and resume checker MVP"
-```
-
-4. Push to GitHub:
-
-```bash
-git branch -M main
-git push -u origin main
-```
-
-5. Submit the public GitHub repository link with the assignment.
+https://github.com/Dave-ASC1/pathway-ai
 
 ## Self-Reflection Recording Guide
 

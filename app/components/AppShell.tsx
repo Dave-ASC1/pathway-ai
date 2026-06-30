@@ -35,8 +35,8 @@ export function AppShell({ active, children }: AppShellProps) {
           ))}
         </nav>
         <div className="sidebar-support">
-          <span>Student MVP</span>
-          <p>Local demo mode. No account or API key required.</p>
+          <span>Free to use</span>
+          <p>No account required. All tools are available at no cost.</p>
         </div>
       </aside>
       <section className="app-main">{children}</section>

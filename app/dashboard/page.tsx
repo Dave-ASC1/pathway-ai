@@ -4,18 +4,18 @@ import { AppShell } from "../components/AppShell";
 const readinessCards = [
   {
     label: "Resume",
-    value: "Ready to analyze",
-    detail: "Paste a resume and job description to receive a local ATS-style review.",
+    value: "AI-powered analysis",
+    detail: "Paste your resume and a job description to get a real match score, missing keywords, and specific improvements.",
   },
   {
     label: "Career path",
-    value: "Guided next",
-    detail: "Use resume feedback to choose realistic student-friendly roles.",
+    value: "Discover your direction",
+    detail: "Use your resume and interests to find realistic entry-level roles worth pursuing.",
   },
   {
     label: "Skill roadmap",
-    value: "Planned",
-    detail: "Convert gaps into a learning path with practical milestones.",
+    value: "Build toward your goal",
+    detail: "Turn identified skill gaps into a focused, step-by-step learning plan.",
   },
 ];
 
@@ -23,34 +23,34 @@ const moduleCards = [
   {
     id: "resume",
     title: "ATS Resume Checker",
-    status: "Working MVP",
+    status: "Available now",
     description:
-      "Compare resume content against a target job description and return match score, missing keywords, strengths, and next-step improvements.",
+      "Compare your resume against any job description. Get a match score, see missing keywords, and receive specific improvements powered by Claude AI.",
     href: "/resume-checker",
   },
   {
     id: "career",
     title: "Career Path Explorer",
-    status: "Prototype",
+    status: "Coming soon",
     description:
-      "Suggest realistic entry-level career directions based on resume signals, interests, and selected target roles.",
-    href: "/dashboard#career",
+      "Discover realistic career directions based on your major, skills, and interests. Get three tailored paths with role titles, progression, and what you need to get there.",
+    href: "/resume-checker",
   },
   {
     id: "roadmap",
     title: "Skill Gap Roadmap",
-    status: "Prototype",
+    status: "Coming soon",
     description:
-      "Turn resume gaps into a sequence of skills, projects, and practice tasks students can complete over time.",
-    href: "/dashboard#roadmap",
+      "Turn the gap between where you are and where you want to be into a clear, prioritized learning plan with actionable next steps.",
+    href: "/resume-checker",
   },
   {
     id: "interview",
     title: "Mock Interview Coach",
-    status: "Prototype",
+    status: "Coming soon",
     description:
-      "Generate practice prompts and answer feedback tied to the role and resume improvements.",
-    href: "/dashboard#interview",
+      "Practice role-specific interview questions and get structured feedback on your answers — so you walk in prepared, not hoping for the best.",
+    href: "/resume-checker",
   },
 ];
 
@@ -67,15 +67,15 @@ export default function DashboardPage() {
     <AppShell active="dashboard">
       <section className="app-hero">
         <div>
-          <p className="app-kicker">Pathway AI dashboard</p>
-          <h1>Your career readiness workspace.</h1>
+          <p className="app-kicker">Career workspace</p>
+          <h1>Everything you need to go from student to hired.</h1>
           <p>
-            This MVP connects the student journey from resume feedback to
-            career direction, roadmap planning, and interview preparation.
+            Run your resume through AI analysis, discover roles worth pursuing,
+            build the skills that close the gap, and practice until the interview feels easy.
           </p>
         </div>
         <Link className="primary-action" href="/resume-checker">
-          Start resume check
+          Check my resume
         </Link>
       </section>
 
@@ -93,11 +93,11 @@ export default function DashboardPage() {
         <div className="workspace-heading">
           <div>
             <p className="app-kicker">Core modules</p>
-            <h2>One connected product flow</h2>
+            <h2>Four tools, one connected journey.</h2>
           </div>
           <p>
-            The resume checker is the completed MVP slice. The remaining modules
-            are represented as planned product surfaces for the next build phase.
+            Each module builds on the last — resume feedback informs your career direction,
+            which shapes your skill roadmap, which prepares you for interviews.
           </p>
         </div>
 
@@ -110,7 +110,7 @@ export default function DashboardPage() {
               <h3>{module.title}</h3>
               <p>{module.description}</p>
               <Link className="text-action" href={module.href}>
-                {module.status === "Working MVP" ? "Open module" : "View plan"}
+                {module.status === "Available now" ? "Open module" : "Coming soon"}
               </Link>
             </article>
           ))}
@@ -120,8 +120,8 @@ export default function DashboardPage() {
       <section className="workspace-section">
         <div className="workspace-heading">
           <div>
-            <p className="app-kicker">Operational flow</p>
-            <h2>How a student moves through Pathway AI</h2>
+            <p className="app-kicker">How it works</p>
+            <h2>Five steps from where you are to where you want to be.</h2>
           </div>
         </div>
         <div className="flow-steps">

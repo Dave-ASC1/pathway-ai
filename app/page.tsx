@@ -192,7 +192,7 @@ export default function Home() {
               <span />
               <span />
             </div>
-            <span className="preview-url">pathway-ai.vercel.app/dashboard</span>
+            <span className="preview-url">pathway-aiapp.vercel.app/dashboard</span>
           </div>
 
           <div className="preview-content">
@@ -243,11 +243,10 @@ export default function Home() {
 
               <div className="loading-card">
                 <div>
-                  <span className="loading-label">Loading state preview</span>
+                  <span className="loading-label">Powered by Claude AI</span>
                   <p>
-                    Pathway AI uses this branded loading state while resume
-                    feedback, roadmaps, career suggestions, or interview
-                    coaching are being generated.
+                    Real-time analysis from one of the most capable AI models available —
+                    so your feedback is specific, actionable, and built for your situation.
                   </p>
                 </div>
                 <PathwayLoader />
@@ -309,9 +308,9 @@ export default function Home() {
         <div className="section-intro">
           <h2>Four focused tools, one connected student journey.</h2>
           <p>
-            Each module should eventually share context with the next, so the
-            student is not starting over every time they move from resume
-            feedback to interviews.
+            Each module builds on the last — resume feedback informs your career direction,
+            which shapes your skill roadmap, which prepares you for the interview.
+            No jumping between apps. No starting over.
           </p>
         </div>
         <div className="module-grid">
@@ -324,7 +323,7 @@ export default function Home() {
                 className="module-status"
                 href={module.label === "01" ? "/resume-checker" : "/dashboard"}
               >
-                {module.label === "01" ? "Working MVP" : "Planned module"}
+                {module.label === "01" ? "Available now →" : "Coming soon"}
               </a>
             </article>
           ))}

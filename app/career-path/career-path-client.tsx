@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PathwayLoader } from "../components/PathwayLoader";
 
 type CareerPath = {
   title: string;
@@ -120,7 +121,8 @@ export function CareerPathClient() {
 
       <section className="career-results" aria-live="polite">
         {isLoading ? (
-          <div className="empty-state">
+          <div className="empty-state loading-state">
+            <PathwayLoader />
             <h2>Mapping your career paths…</h2>
             <p>Pathway AI is analyzing your profile to find realistic directions.</p>
           </div>

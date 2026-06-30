@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { PathwayLoader } from "../components/PathwayLoader";
 
 type RoadmapStep = {
   skill: string;
@@ -94,7 +95,8 @@ export function SkillGapClient() {
 
       <section className="career-results" aria-live="polite">
         {isLoading ? (
-          <div className="empty-state">
+          <div className="empty-state loading-state">
+            <PathwayLoader />
             <h2>Building your roadmap…</h2>
             <p>Pathway AI is mapping the gap between your skills and the role.</p>
           </div>

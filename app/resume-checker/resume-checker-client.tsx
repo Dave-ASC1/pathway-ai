@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { PathwayLoader } from "../components/PathwayLoader";
 
 const sampleResume = `David Ademoye
 Information Sciences and Technology student
@@ -238,7 +239,8 @@ export function ResumeCheckerClient() {
         </div>
 
         {isLoading ? (
-          <div className="empty-state">
+          <div className="empty-state loading-state">
+            <PathwayLoader />
             <h2>Analyzing your resume…</h2>
             <p>Pathway AI is reviewing your resume against the job description.</p>
           </div>

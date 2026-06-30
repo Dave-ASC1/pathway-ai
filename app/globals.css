@@ -1183,6 +1183,29 @@ a {
   margin-top: 1rem;
 }
 
+.loading-state {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  padding: 2.5rem 1rem;
+}
+
+.loading-state .pathway-loader {
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.loading-state h2 {
+  margin: 0;
+}
+
+.loading-state p {
+  margin: 0;
+  max-width: 32ch;
+}
+
 .career-layout {
   display: grid;
   gap: 1rem;

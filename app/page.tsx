@@ -30,8 +30,8 @@ const modules = [
     title: "Mock Interview Coach",
     description:
       "Practice role-based interview questions and receive structured feedback that improves confidence and clarity.",
-    href: "/dashboard",
-    available: false,
+    href: "/interview",
+    available: true,
   },
 ];
 

@@ -8,7 +8,7 @@ const appLinks: { href: string; label: string; key: ActiveModule }[] = [
   { href: "/resume-checker", label: "Resume checker", key: "resume" },
   { href: "/career-path", label: "Career paths", key: "career" },
   { href: "/skill-gap", label: "Roadmap", key: "roadmap" },
-  { href: "/dashboard#interview", label: "Interview", key: "interview" },
+  { href: "/interview", label: "Interview", key: "interview" },
 ];
 
 type AppShellProps = {

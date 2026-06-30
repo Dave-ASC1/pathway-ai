@@ -47,10 +47,10 @@ const moduleCards = [
   {
     id: "interview",
     title: "Mock Interview Coach",
-    status: "Coming soon",
+    status: "Available now",
     description:
       "Practice role-specific interview questions and get structured feedback on your answers, so you walk in prepared instead of hoping for the best.",
-    href: "/resume-checker",
+    href: "/interview",
   },
 ];
 

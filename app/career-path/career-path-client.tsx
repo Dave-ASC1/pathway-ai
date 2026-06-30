@@ -63,7 +63,7 @@ export function CareerPathClient() {
             <h1>Find career directions worth pursuing.</h1>
           </div>
           <p>
-            Tell us about yourself and Claude AI will map three realistic career
+            Tell us about yourself and Pathway AI will map three realistic career
             paths — with the roles, the skills, and your first step toward each.
           </p>
         </div>
@@ -122,7 +122,7 @@ export function CareerPathClient() {
         {isLoading ? (
           <div className="empty-state">
             <h2>Mapping your career paths…</h2>
-            <p>Claude is analyzing your profile to find realistic directions.</p>
+            <p>Pathway AI is analyzing your profile to find realistic directions.</p>
           </div>
         ) : error ? (
           <div className="empty-state">

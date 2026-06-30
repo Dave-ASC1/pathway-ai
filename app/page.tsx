@@ -251,7 +251,7 @@ export default function Home() {
 
               <div className="loading-card">
                 <div>
-                  <span className="loading-label">Powered by Claude AI</span>
+                  <span className="loading-label">Powered by Pathway AI</span>
                   <p>
                     Real-time analysis from one of the most capable AI models available —
                     so your feedback is specific, actionable, and built for your situation.

@@ -174,7 +174,7 @@ export function ResumeCheckerClient() {
           </div>
           <p>
             {analysisSource === "claude"
-              ? "Powered by Claude AI — advanced analysis of your resume against the job description."
+              ? "Powered by Pathway AI — advanced analysis of your resume against the job description."
               : "Using keyword matching and section detection. Add an API key to enable AI analysis."}
           </p>
         </div>
@@ -240,7 +240,7 @@ export function ResumeCheckerClient() {
         {isLoading ? (
           <div className="empty-state">
             <h2>Analyzing your resume…</h2>
-            <p>Claude is reviewing your resume against the job description.</p>
+            <p>Pathway AI is reviewing your resume against the job description.</p>
           </div>
         ) : !canAnalyze ? (
           <div className="empty-state">

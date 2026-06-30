@@ -25,7 +25,7 @@ const moduleCards = [
     title: "ATS Resume Checker",
     status: "Available now",
     description:
-      "Compare your resume against any job description. Get a match score, see missing keywords, and receive specific improvements powered by Claude AI.",
+      "Compare your resume against any job description. Get a match score, see missing keywords, and receive specific improvements powered by Pathway AI.",
     href: "/resume-checker",
   },
   {

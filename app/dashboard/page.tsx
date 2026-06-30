@@ -49,7 +49,7 @@ const moduleCards = [
     title: "Mock Interview Coach",
     status: "Coming soon",
     description:
-      "Practice role-specific interview questions and get structured feedback on your answers — so you walk in prepared, not hoping for the best.",
+      "Practice role-specific interview questions and get structured feedback on your answers, so you walk in prepared instead of hoping for the best.",
     href: "/resume-checker",
   },
 ];
@@ -96,7 +96,7 @@ export default function DashboardPage() {
             <h2>Four tools, one connected journey.</h2>
           </div>
           <p>
-            Each module builds on the last — resume feedback informs your career direction,
+            Each module builds on the last. Resume feedback informs your career direction,
             which shapes your skill roadmap, which prepares you for interviews.
           </p>
         </div>

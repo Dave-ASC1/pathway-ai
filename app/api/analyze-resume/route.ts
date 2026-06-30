@@ -118,6 +118,7 @@ Rules:
 - strengths: exactly 3 specific, student-focused observations about what the resume does well
 - improvements: exactly 3 specific, actionable recommendations to better match the target role
 - score: overall ATS match quality considering keyword overlap, section completeness, and relevance
+- Writing style: in strengths and improvements, do not use em dashes or en dashes. Use commas, periods, or parentheses instead. Keep the tone natural and human.
 
 RESUME:
 ${resume}

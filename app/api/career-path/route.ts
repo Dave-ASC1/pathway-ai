@@ -48,6 +48,7 @@ Rules:
 - progression: 3 role titles showing a 5-10 year trajectory.
 - skills: 5 specific, named skills or tools the path requires.
 - firstStep: concrete and doable this semester (a class, project, certification, club, or internship type).
+- Writing style: do not use em dashes or en dashes. Use commas, periods, or parentheses instead. Keep the tone natural and human.
 
 STUDENT PROFILE:
 Major: ${input.major}

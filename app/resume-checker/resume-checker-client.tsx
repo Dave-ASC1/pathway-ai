@@ -174,7 +174,7 @@ export function ResumeCheckerClient() {
           </div>
           <p>
             {analysisSource === "claude"
-              ? "Powered by Pathway AI — advanced analysis of your resume against the job description."
+              ? "Powered by Pathway AI for advanced analysis of your resume against the job description."
               : "Using keyword matching and section detection. Add an API key to enable AI analysis."}
           </p>
         </div>

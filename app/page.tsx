@@ -11,7 +11,7 @@ const modules = [
     label: "02",
     title: "Career Path Explorer",
     description:
-      "Use your profile, skills, and interests to discover three realistic career paths — with role progression and the skills each one needs.",
+      "Use your profile, skills, and interests to discover three realistic career paths, each with role progression and the skills it needs.",
     href: "/career-path",
     available: true,
   },
@@ -48,7 +48,7 @@ const studentSignals = [
 ];
 
 const trustPrinciples = [
-  "Your resume and job description are never stored — they are analyzed and discarded.",
+  "Your resume and job description are never stored. They are analyzed and discarded.",
   "AI feedback explains the reasoning behind every recommendation.",
   "No account or sign-up required to use any tool.",
 ];
@@ -253,8 +253,8 @@ export default function Home() {
                 <div>
                   <span className="loading-label">Powered by Pathway AI</span>
                   <p>
-                    Real-time analysis from one of the most capable AI models available —
-                    so your feedback is specific, actionable, and built for your situation.
+                    Real-time analysis built for your situation, so your feedback is
+                    always specific and actionable.
                   </p>
                 </div>
                 <PathwayLoader />
@@ -316,7 +316,7 @@ export default function Home() {
         <div className="section-intro">
           <h2>Four focused tools, one connected student journey.</h2>
           <p>
-            Each module builds on the last — resume feedback informs your career direction,
+            Each module builds on the last. Resume feedback informs your career direction,
             which shapes your skill roadmap, which prepares you for the interview.
             No jumping between apps. No starting over.
           </p>

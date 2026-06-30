@@ -64,7 +64,7 @@ export function CareerPathClient() {
           </div>
           <p>
             Tell us about yourself and Pathway AI will map three realistic career
-            paths — with the roles, the skills, and your first step toward each.
+            paths, including the roles, the skills, and your first step toward each.
           </p>
         </div>
 
@@ -106,7 +106,7 @@ export function CareerPathClient() {
               type="text"
               value={targetIndustries}
               onChange={(e) => setTargetIndustries(e.target.value)}
-              placeholder="e.g. healthcare, finance, tech — or leave blank"
+              placeholder="e.g. healthcare, finance, tech (or leave blank)"
             />
           </label>
 

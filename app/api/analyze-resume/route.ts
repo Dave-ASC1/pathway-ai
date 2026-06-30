@@ -168,13 +168,11 @@ export async function POST(req: NextRequest) {
     try {
       const result = await claudeAnalyze(resume, jobDescription);
       return NextResponse.json({ ...result, source: "claude" });
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      const result = localAnalyze(resume, jobDescription);
-      return NextResponse.json({ ...result, source: "local", error: errorMessage });
+    } catch {
+      // Fall through to local fallback
     }
   }
 
   const result = localAnalyze(resume, jobDescription);
-  return NextResponse.json({ ...result, source: "local", error: "ANTHROPIC_API_KEY not set" });
+  return NextResponse.json({ ...result, source: "local" });
 }

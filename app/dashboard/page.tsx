@@ -39,10 +39,10 @@ const moduleCards = [
   {
     id: "roadmap",
     title: "Skill Gap Roadmap",
-    status: "Coming soon",
+    status: "Available now",
     description:
       "Turn the gap between where you are and where you want to be into a clear, prioritized learning plan with actionable next steps.",
-    href: "/resume-checker",
+    href: "/skill-gap",
   },
   {
     id: "interview",

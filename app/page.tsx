@@ -19,9 +19,9 @@ const modules = [
     label: "03",
     title: "Skill Gap Roadmap",
     description:
-      "Turn a selected role into a clear five-step learning plan with practical tasks, estimated time, and progress tracking.",
-    href: "/dashboard",
-    available: false,
+      "Turn a target role into a clear, prioritized learning plan with practical tasks, resource types, and time estimates.",
+    href: "/skill-gap",
+    available: true,
   },
   {
     label: "04",

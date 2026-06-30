@@ -7,7 +7,7 @@ const appLinks: { href: string; label: string; key: ActiveModule }[] = [
   { href: "/dashboard", label: "Dashboard", key: "dashboard" },
   { href: "/resume-checker", label: "Resume checker", key: "resume" },
   { href: "/career-path", label: "Career paths", key: "career" },
-  { href: "/dashboard#roadmap", label: "Roadmap", key: "roadmap" },
+  { href: "/skill-gap", label: "Roadmap", key: "roadmap" },
   { href: "/dashboard#interview", label: "Interview", key: "interview" },
 ];
 

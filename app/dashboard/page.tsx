@@ -31,10 +31,10 @@ const moduleCards = [
   {
     id: "career",
     title: "Career Path Explorer",
-    status: "Coming soon",
+    status: "Available now",
     description:
       "Discover realistic career directions based on your major, skills, and interests. Get three tailored paths with role titles, progression, and what you need to get there.",
-    href: "/resume-checker",
+    href: "/career-path",
   },
   {
     id: "roadmap",

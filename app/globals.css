@@ -1032,7 +1032,9 @@ a {
   font-weight: 800;
 }
 
-.checker-form textarea {
+.checker-form textarea,
+.checker-form input,
+.checker-form select {
   width: 100%;
   resize: vertical;
   border: 1px solid var(--line);
@@ -1044,7 +1046,14 @@ a {
   padding: 1rem;
 }
 
-.checker-form textarea:focus {
+.checker-form input,
+.checker-form select {
+  resize: none;
+}
+
+.checker-form textarea:focus,
+.checker-form input:focus,
+.checker-form select:focus {
   border-color: rgba(59, 130, 246, 0.8);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
   outline: none;
@@ -1174,6 +1183,97 @@ a {
   margin-top: 1rem;
 }
 
+.career-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.career-results {
+  margin-top: 0.2rem;
+}
+
+.path-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.path-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--white);
+  padding: 1.4rem;
+}
+
+.path-number {
+  color: var(--soft-blue);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.path-card h2 {
+  margin: 0;
+  color: var(--deep-navy);
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.path-fit {
+  margin: 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.path-section h3,
+.path-firststep h3 {
+  margin: 0 0 0.55rem;
+  color: var(--brand-blue);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.path-progression {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.path-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--deep-navy);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.path-role em {
+  color: var(--soft-blue);
+  font-style: normal;
+}
+
+.path-firststep {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+
+.path-firststep p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.5;
+}
+
 @media (max-width: 980px) {
   .desktop-nav {
     display: none;
@@ -1201,6 +1301,10 @@ a {
 
   .app-shell,
   .checker-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .path-grid {
     grid-template-columns: 1fr;
   }
 

@@ -4,24 +4,32 @@ const modules = [
     title: "ATS Resume Checker",
     description:
       "Compare your resume with a target job description, identify missing keywords, and receive specific resume improvement suggestions.",
+    href: "/resume-checker",
+    available: true,
   },
   {
     label: "02",
     title: "Career Path Explorer",
     description:
-      "Use your profile, skills, interests, and resume analysis to discover realistic career paths built for students.",
+      "Use your profile, skills, and interests to discover three realistic career paths — with role progression and the skills each one needs.",
+    href: "/career-path",
+    available: true,
   },
   {
     label: "03",
     title: "Skill Gap Roadmap",
     description:
       "Turn a selected role into a clear five-step learning plan with practical tasks, estimated time, and progress tracking.",
+    href: "/dashboard",
+    available: false,
   },
   {
     label: "04",
     title: "Mock Interview Coach",
     description:
       "Practice role-based interview questions and receive structured feedback that improves confidence and clarity.",
+    href: "/dashboard",
+    available: false,
   },
 ];
 
@@ -40,9 +48,9 @@ const studentSignals = [
 ];
 
 const trustPrinciples = [
-  "Full resume and job description text are not saved by default.",
-  "AI feedback explains the why behind each recommendation.",
-  "Students can delete saved Pathway AI data from settings.",
+  "Your resume and job description are never stored — they are analyzed and discarded.",
+  "AI feedback explains the reasoning behind every recommendation.",
+  "No account or sign-up required to use any tool.",
 ];
 
 function PathwayLogo({ showText = true }: { showText?: boolean }) {
@@ -319,11 +327,8 @@ export default function Home() {
               <span>{module.label}</span>
               <h3>{module.title}</h3>
               <p>{module.description}</p>
-              <a
-                className="module-status"
-                href={module.label === "01" ? "/resume-checker" : "/dashboard"}
-              >
-                {module.label === "01" ? "Available now →" : "Coming soon"}
+              <a className="module-status" href={module.href}>
+                {module.available ? "Available now →" : "Coming soon"}
               </a>
             </article>
           ))}

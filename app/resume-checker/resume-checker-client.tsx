@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 const sampleResume = `David Ademoye
 Information Sciences and Technology student
@@ -133,25 +133,49 @@ export function ResumeCheckerClient() {
   const [resume, setResume] = useState(sampleResume);
   const [jobDescription, setJobDescription] = useState(sampleJobDescription);
   const [hasAnalyzed, setHasAnalyzed] = useState(true);
-
-  const analysis = useMemo(
-    () => analyzeResume(resume, jobDescription),
-    [resume, jobDescription],
-  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [analysis, setAnalysis] = useState<Analysis>(() => analyzeResume(sampleResume, sampleJobDescription));
+  const [analysisSource, setAnalysisSource] = useState<"claude" | "local">("local");
 
   const canAnalyze = resume.trim().length > 40 && jobDescription.trim().length > 40;
+
+  const runAnalysis = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/analyze-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resume, jobDescription }),
+      });
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      setAnalysis(data);
+      setAnalysisSource(data.source ?? "local");
+      setHasAnalyzed(true);
+    } catch {
+      const fallback = analyzeResume(resume, jobDescription);
+      setAnalysis(fallback);
+      setAnalysisSource("local");
+      setHasAnalyzed(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [resume, jobDescription]);
+
+  const currentAnalysis = analysis;
 
   return (
     <div className="checker-layout">
       <section className="checker-panel">
         <div className="workspace-heading compact">
           <div>
-            <p className="app-kicker">Resume checker MVP</p>
+            <p className="app-kicker">Resume checker</p>
             <h1>Compare your resume to a target role.</h1>
           </div>
           <p>
-            This local MVP uses keyword matching, section detection, and
-            student-focused recommendations. It runs without external AI keys.
+            {analysisSource === "claude"
+              ? "Powered by Claude AI — advanced analysis of your resume against the job description."
+              : "Using keyword matching and section detection. Add an API key to enable AI analysis."}
           </p>
         </div>
 
@@ -159,7 +183,7 @@ export function ResumeCheckerClient() {
           className="checker-form"
           onSubmit={(event) => {
             event.preventDefault();
-            setHasAnalyzed(true);
+            runAnalysis();
           }}
         >
           <label>
@@ -187,8 +211,8 @@ export function ResumeCheckerClient() {
           </label>
 
           <div className="checker-actions">
-            <button className="primary-action" disabled={!canAnalyze} type="submit">
-              Analyze resume
+            <button className="primary-action" disabled={!canAnalyze || isLoading} type="submit">
+              {isLoading ? "Analyzing…" : "Analyze resume"}
             </button>
             <button
               className="secondary-action"
@@ -196,6 +220,8 @@ export function ResumeCheckerClient() {
               onClick={() => {
                 setResume(sampleResume);
                 setJobDescription(sampleJobDescription);
+                setAnalysis(analyzeResume(sampleResume, sampleJobDescription));
+                setAnalysisSource("local");
                 setHasAnalyzed(true);
               }}
             >
@@ -206,12 +232,17 @@ export function ResumeCheckerClient() {
       </section>
 
       <aside className="results-panel" aria-live="polite">
-        <div className="score-ring" aria-label={`Resume match score ${analysis.score}%`}>
-          <span>{hasAnalyzed ? analysis.score : "--"}%</span>
+        <div className="score-ring" aria-label={`Resume match score ${currentAnalysis.score}%`}>
+          <span>{hasAnalyzed ? currentAnalysis.score : "--"}%</span>
           <p>Match score</p>
         </div>
 
-        {!canAnalyze ? (
+        {isLoading ? (
+          <div className="empty-state">
+            <h2>Analyzing your resume…</h2>
+            <p>Claude is reviewing your resume against the job description.</p>
+          </div>
+        ) : !canAnalyze ? (
           <div className="empty-state">
             <h2>Add enough resume and job description text.</h2>
             <p>
@@ -224,7 +255,7 @@ export function ResumeCheckerClient() {
             <section className="result-block">
               <h2>Matched keywords</h2>
               <div className="keyword-list">
-                {analysis.matchedKeywords.slice(0, 10).map((keyword) => (
+                {currentAnalysis.matchedKeywords.slice(0, 10).map((keyword) => (
                   <span className="keyword matched" key={keyword}>
                     {keyword}
                   </span>
@@ -235,7 +266,7 @@ export function ResumeCheckerClient() {
             <section className="result-block">
               <h2>Missing keywords</h2>
               <div className="keyword-list">
-                {analysis.missingKeywords.slice(0, 10).map((keyword) => (
+                {currentAnalysis.missingKeywords.slice(0, 10).map((keyword) => (
                   <span className="keyword missing" key={keyword}>
                     {keyword}
                   </span>
@@ -246,7 +277,7 @@ export function ResumeCheckerClient() {
             <section className="result-block">
               <h2>Resume sections</h2>
               <div className="section-checks">
-                {analysis.sections.map((section) => (
+                {currentAnalysis.sections.map((section) => (
                   <div className="section-check" key={section.label}>
                     <span>{section.present ? "Ready" : "Add"}</span>
                     <p>{section.label}</p>
@@ -258,7 +289,7 @@ export function ResumeCheckerClient() {
             <section className="result-block">
               <h2>Strengths</h2>
               <ul>
-                {analysis.strengths.map((item) => (
+                {currentAnalysis.strengths.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
@@ -267,7 +298,7 @@ export function ResumeCheckerClient() {
             <section className="result-block">
               <h2>Recommended improvements</h2>
               <ul>
-                {analysis.improvements.map((item) => (
+                {currentAnalysis.improvements.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>

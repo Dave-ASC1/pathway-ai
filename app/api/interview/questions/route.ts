@@ -1,5 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const MAX_FIELD_LENGTH = 20000;
 
 type Question = {
   question: string;
@@ -60,6 +63,9 @@ ${role}`;
 }
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit(req, { name: "interview-questions", limit: 8, windowMs: 60000 });
+  if (limited) return limited;
+
   const body = await req.json().catch(() => null);
   const role: string = body?.role ?? "";
 
@@ -67,6 +73,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "A job role or description is required." },
       { status: 400 },
+    );
+  }
+
+  if (role.length > MAX_FIELD_LENGTH) {
+    return NextResponse.json(
+      { error: "Input is too long. Please shorten your text." },
+      { status: 413 },
     );
   }
 

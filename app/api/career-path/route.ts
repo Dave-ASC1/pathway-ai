@@ -1,5 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const MAX_FIELD_LENGTH = 10000;
 
 type CareerPath = {
   title: string;
@@ -76,6 +79,9 @@ Target industries: ${input.targetIndustries || "Open to suggestions"}`;
 }
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit(req, { name: "career-path", limit: 8, windowMs: 60000 });
+  if (limited) return limited;
+
   const body = await req.json().catch(() => null);
   const major: string = body?.major ?? "";
   const year: string = body?.year ?? "";
@@ -86,6 +92,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Major and interests are required." },
       { status: 400 },
+    );
+  }
+
+  if (
+    major.length > MAX_FIELD_LENGTH ||
+    interests.length > MAX_FIELD_LENGTH ||
+    targetIndustries.length > MAX_FIELD_LENGTH
+  ) {
+    return NextResponse.json(
+      { error: "Input is too long. Please shorten your text." },
+      { status: 413 },
     );
   }
 

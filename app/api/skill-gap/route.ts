@@ -1,5 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const MAX_FIELD_LENGTH = 10000;
 
 type RoadmapStep = {
   skill: string;
@@ -94,6 +97,9 @@ ${input.targetRole}`;
 }
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit(req, { name: "skill-gap", limit: 8, windowMs: 60000 });
+  if (limited) return limited;
+
   const body = await req.json().catch(() => null);
   const currentSkills: string = body?.currentSkills ?? "";
   const targetRole: string = body?.targetRole ?? "";
@@ -102,6 +108,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Your current skills and a target role are required." },
       { status: 400 },
+    );
+  }
+
+  if (currentSkills.length > MAX_FIELD_LENGTH || targetRole.length > MAX_FIELD_LENGTH) {
+    return NextResponse.json(
+      { error: "Input is too long. Please shorten your text." },
+      { status: 413 },
     );
   }
 

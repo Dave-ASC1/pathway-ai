@@ -1,5 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const MAX_FIELD_LENGTH = 20000;
 
 type Section = { label: string; present: boolean };
 
@@ -157,12 +160,19 @@ ${jobDescription}`;
 // ── Route handler ──────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit(req, { name: "analyze-resume", limit: 10, windowMs: 60000 });
+  if (limited) return limited;
+
   const body = await req.json().catch(() => null);
   const resume: string = body?.resume ?? "";
   const jobDescription: string = body?.jobDescription ?? "";
 
   if (!resume.trim() || !jobDescription.trim()) {
     return NextResponse.json({ error: "resume and jobDescription are required" }, { status: 400 });
+  }
+
+  if (resume.length > MAX_FIELD_LENGTH || jobDescription.length > MAX_FIELD_LENGTH) {
+    return NextResponse.json({ error: "Input is too long. Please shorten your text." }, { status: 413 });
   }
 
   if (process.env.ANTHROPIC_API_KEY) {

@@ -1,5 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const MAX_TOTAL_LENGTH = 40000;
 
 type AnswerInput = { question: string; answer: string };
 
@@ -76,6 +79,9 @@ ${qa}`;
 }
 
 export async function POST(req: NextRequest) {
+  const limited = checkRateLimit(req, { name: "interview-evaluate", limit: 6, windowMs: 60000 });
+  if (limited) return limited;
+
   const body = await req.json().catch(() => null);
   const role: string = body?.role ?? "";
   const rawAnswers: AnswerInput[] = Array.isArray(body?.answers) ? body.answers : [];
@@ -89,6 +95,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Answer at least one question before requesting feedback." },
       { status: 400 },
+    );
+  }
+
+  const totalLength =
+    role.length +
+    answers.reduce((sum, a) => sum + (a.question?.length ?? 0) + (a.answer?.length ?? 0), 0);
+  if (totalLength > MAX_TOTAL_LENGTH) {
+    return NextResponse.json(
+      { error: "Input is too long. Please shorten your answers." },
+      { status: 413 },
     );
   }
 

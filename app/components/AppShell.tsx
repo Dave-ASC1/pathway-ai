@@ -20,7 +20,7 @@ export function AppShell({ active, children }: AppShellProps) {
   return (
     <main className="app-shell">
       <aside className="app-sidebar" aria-label="Pathway AI workspace">
-        <PathwayLogo href="/dashboard" />
+        <PathwayLogo href="/" />
         <nav className="app-nav" aria-label="Workspace navigation">
           {appLinks.map((link) => (
             <Link

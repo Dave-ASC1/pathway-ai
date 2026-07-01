@@ -131,37 +131,40 @@ function analyzeResume(resume: string, jobDescription: string): Analysis {
 }
 
 export function ResumeCheckerClient() {
-  const [resume, setResume] = useState(sampleResume);
-  const [jobDescription, setJobDescription] = useState(sampleJobDescription);
-  const [hasAnalyzed, setHasAnalyzed] = useState(true);
+  const [resume, setResume] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<Analysis>(() => analyzeResume(sampleResume, sampleJobDescription));
+  const [analysis, setAnalysis] = useState<Analysis>(() => analyzeResume("", ""));
   const [analysisSource, setAnalysisSource] = useState<"claude" | "local">("local");
 
   const canAnalyze = resume.trim().length > 40 && jobDescription.trim().length > 40;
 
-  const runAnalysis = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/analyze-resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resume, jobDescription }),
-      });
-      if (!res.ok) throw new Error("API error");
-      const data = await res.json();
-      setAnalysis(data);
-      setAnalysisSource(data.source ?? "local");
-      setHasAnalyzed(true);
-    } catch {
-      const fallback = analyzeResume(resume, jobDescription);
-      setAnalysis(fallback);
-      setAnalysisSource("local");
-      setHasAnalyzed(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [resume, jobDescription]);
+  const runAnalysis = useCallback(
+    async (r: string = resume, jd: string = jobDescription) => {
+      setIsLoading(true);
+      try {
+        const res = await fetch("/api/analyze-resume", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ resume: r, jobDescription: jd }),
+        });
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        setAnalysis(data);
+        setAnalysisSource(data.source ?? "local");
+        setHasAnalyzed(true);
+      } catch {
+        const fallback = analyzeResume(r, jd);
+        setAnalysis(fallback);
+        setAnalysisSource("local");
+        setHasAnalyzed(true);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [resume, jobDescription],
+  );
 
   const currentAnalysis = analysis;
 
@@ -174,9 +177,11 @@ export function ResumeCheckerClient() {
             <h1>Compare your resume to a target role.</h1>
           </div>
           <p>
-            {analysisSource === "claude"
-              ? "Powered by Pathway AI for advanced analysis of your resume against the job description."
-              : "Using keyword matching and section detection. Add an API key to enable AI analysis."}
+            {!hasAnalyzed
+              ? "Paste your resume and a target job description to get a match score and specific improvements."
+              : analysisSource === "claude"
+                ? "Powered by Pathway AI for advanced analysis of your resume against the job description."
+                : "Analyzed using keyword matching and section detection."}
           </p>
         </div>
 
@@ -196,6 +201,7 @@ export function ResumeCheckerClient() {
                 setHasAnalyzed(false);
               }}
               rows={13}
+              placeholder="Paste your resume here..."
             />
           </label>
 
@@ -208,6 +214,7 @@ export function ResumeCheckerClient() {
                 setHasAnalyzed(false);
               }}
               rows={11}
+              placeholder="Paste the job description here..."
             />
           </label>
 
@@ -218,15 +225,14 @@ export function ResumeCheckerClient() {
             <button
               className="secondary-action"
               type="button"
+              disabled={isLoading}
               onClick={() => {
                 setResume(sampleResume);
                 setJobDescription(sampleJobDescription);
-                setAnalysis(analyzeResume(sampleResume, sampleJobDescription));
-                setAnalysisSource("local");
-                setHasAnalyzed(true);
+                runAnalysis(sampleResume, sampleJobDescription);
               }}
             >
-              Load sample
+              Try an example
             </button>
           </div>
         </form>

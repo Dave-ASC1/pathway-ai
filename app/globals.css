@@ -1032,8 +1032,73 @@ a {
   font-weight: 800;
 }
 
+.checker-field {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.field-label {
+  color: var(--deep-navy);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.field-label-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.upload-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 999px;
+  background: rgba(239, 246, 255, 0.86);
+  color: var(--brand-blue);
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.4rem 0.75rem;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.upload-button:hover {
+  background: rgba(219, 234, 254, 0.95);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.upload-input:disabled + .upload-button {
+  cursor: progress;
+  opacity: 0.6;
+}
+
+.upload-status {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.upload-status.error {
+  color: #b91c1c;
+}
+
 .checker-form textarea,
-.checker-form input,
+.checker-form input:not([type="file"]),
 .checker-form select {
   width: 100%;
   resize: vertical;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 
 const sampleResume = `David Ademoye
@@ -137,8 +137,37 @@ export function ResumeCheckerClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<Analysis>(() => analyzeResume("", ""));
   const [analysisSource, setAnalysisSource] = useState<"claude" | "local">("local");
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedName, setUploadedName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canAnalyze = resume.trim().length > 40 && jobDescription.trim().length > 40;
+
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Reset the input so selecting the same file again still fires onChange
+    event.target.value = "";
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/parse-resume", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Could not read that file.");
+      setResume(data.text);
+      setUploadedName(file.name);
+      setHasAnalyzed(false);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Could not read that file.");
+      setUploadedName(null);
+    } finally {
+      setIsUploading(false);
+    }
+  }
 
   const runAnalysis = useCallback(
     async (r: string = resume, jd: string = jobDescription) => {
@@ -192,18 +221,47 @@ export function ResumeCheckerClient() {
             runAnalysis();
           }}
         >
-          <label>
-            Resume text
+          <div className="checker-field">
+            <div className="field-label-row">
+              <label htmlFor="resume-text" className="field-label">
+                Resume text
+              </label>
+              <span className="upload-control">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  onChange={handleFileUpload}
+                  disabled={isUploading}
+                  className="upload-input"
+                  tabIndex={-1}
+                />
+                <button
+                  type="button"
+                  className="upload-button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? "Reading file…" : "Upload PDF or DOCX"}
+                </button>
+              </span>
+            </div>
             <textarea
+              id="resume-text"
               value={resume}
               onChange={(event) => {
                 setResume(event.target.value);
                 setHasAnalyzed(false);
+                setUploadedName(null);
               }}
               rows={13}
-              placeholder="Paste your resume here..."
+              placeholder="Paste your resume here, or upload a file above."
             />
-          </label>
+            {uploadedName ? (
+              <span className="upload-status">Loaded from {uploadedName}. You can edit it above.</span>
+            ) : null}
+            {uploadError ? <span className="upload-status error">{uploadError}</span> : null}
+          </div>
 
           <label>
             Target job description

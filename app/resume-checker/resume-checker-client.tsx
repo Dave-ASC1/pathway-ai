@@ -402,7 +402,16 @@ export function ResumeCheckerClient() {
                   <Link className="text-action" href="/career-path">
                     Explore career paths
                   </Link>
-                  <Link className="text-action" href="/skill-gap">
+                  <Link
+                    className="text-action"
+                    href={
+                      currentAnalysis.matchedKeywords.length
+                        ? `/skill-gap?skills=${encodeURIComponent(
+                            currentAnalysis.matchedKeywords.slice(0, 12).join(", "),
+                          )}`
+                        : "/skill-gap"
+                    }
+                  >
                     Build a skill roadmap
                   </Link>
                 </div>

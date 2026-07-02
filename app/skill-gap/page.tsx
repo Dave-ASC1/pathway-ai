@@ -5,9 +5,9 @@ import { SkillGapClient } from "./skill-gap-client";
 export default async function SkillGapPage({
   searchParams,
 }: {
-  searchParams: Promise<{ role?: string }>;
+  searchParams: Promise<{ role?: string; skills?: string }>;
 }) {
-  const { role } = await searchParams;
+  const { role, skills } = await searchParams;
 
   return (
     <AppShell active="roadmap">
@@ -16,7 +16,10 @@ export default async function SkillGapPage({
           Back to dashboard
         </Link>
       </div>
-      <SkillGapClient initialRole={typeof role === "string" ? role : ""} />
+      <SkillGapClient
+        initialRole={typeof role === "string" ? role : ""}
+        initialSkills={typeof skills === "string" ? skills : ""}
+      />
     </AppShell>
   );
 }

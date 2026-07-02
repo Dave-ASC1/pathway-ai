@@ -1538,6 +1538,13 @@ a {
   letter-spacing: -0.04em;
 }
 
+.app-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.1rem;
+}
+
 .roadmap-stack {
   display: grid;
   gap: 1rem;
@@ -1889,7 +1896,14 @@ a {
 
   .app-shell,
   .checker-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-sidebar,
+  .app-main,
+  .checker-panel,
+  .results-panel {
+    min-width: 0;
   }
 
   .path-grid {
@@ -1969,9 +1983,25 @@ a {
   .module-grid,
   .metric-grid,
   .workspace-grid,
-  .flow-steps,
-  .app-nav {
+  .flow-steps {
     grid-template-columns: 1fr;
+  }
+
+  .app-nav {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app-nav-link {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .sidebar-support {
+    display: none;
   }
 
   .score-card {

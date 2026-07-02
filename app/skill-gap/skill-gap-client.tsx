@@ -19,8 +19,14 @@ type Roadmap = {
   steps: RoadmapStep[];
 };
 
-export function SkillGapClient({ initialRole = "" }: { initialRole?: string }) {
-  const [currentSkills, setCurrentSkills] = useState("");
+export function SkillGapClient({
+  initialRole = "",
+  initialSkills = "",
+}: {
+  initialRole?: string;
+  initialSkills?: string;
+}) {
+  const [currentSkills, setCurrentSkills] = useState(initialSkills);
   const [targetRole, setTargetRole] = useState(initialRole);
 
   const [isLoading, setIsLoading] = useState(false);

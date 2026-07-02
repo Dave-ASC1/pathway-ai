@@ -74,9 +74,14 @@ export default function DashboardPage() {
             build the skills that close the gap, and practice until the interview feels easy.
           </p>
         </div>
-        <Link className="primary-action" href="/resume-checker">
-          Check my resume
-        </Link>
+        <div className="app-hero-actions">
+          <Link className="primary-action" href="/resume-checker">
+            Check my resume
+          </Link>
+          <Link className="text-action" href="/saved">
+            View saved results
+          </Link>
+        </div>
       </section>
 
       <section className="metric-grid" aria-label="Readiness summary">

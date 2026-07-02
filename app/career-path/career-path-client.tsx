@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
+import { useSessionState, writeSession } from "@/lib/session";
 
 type CareerPath = {
   title: string;
@@ -23,13 +24,13 @@ const yearOptions = [
 ];
 
 export function CareerPathClient() {
-  const [major, setMajor] = useState("");
-  const [year, setYear] = useState(yearOptions[2]);
-  const [interests, setInterests] = useState("");
-  const [targetIndustries, setTargetIndustries] = useState("");
+  const [major, setMajor] = useSessionState("career:major", "");
+  const [year, setYear] = useSessionState("career:year", yearOptions[2]);
+  const [interests, setInterests] = useSessionState("career:interests", "");
+  const [targetIndustries, setTargetIndustries] = useSessionState("career:industries", "");
+  const [paths, setPaths] = useSessionState<CareerPath[] | null>("career:result", null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [paths, setPaths] = useState<CareerPath[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -192,13 +193,15 @@ export function CareerPathClient() {
                 <div className="path-actions">
                   <Link
                     className="text-action"
-                    href={`/skill-gap?role=${encodeURIComponent(path.title)}`}
+                    href="/skill-gap"
+                    onClick={() => writeSession("roadmap:targetRole", path.title)}
                   >
                     Build a roadmap for this
                   </Link>
                   <Link
                     className="text-action"
-                    href={`/interview?role=${encodeURIComponent(path.title)}`}
+                    href="/interview"
+                    onClick={() => writeSession("interview:role", path.title)}
                   >
                     Practice interview
                   </Link>

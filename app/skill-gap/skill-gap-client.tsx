@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
+import { useSessionState, writeSession } from "@/lib/session";
 
 type RoadmapStep = {
   skill: string;
@@ -19,18 +20,12 @@ type Roadmap = {
   steps: RoadmapStep[];
 };
 
-export function SkillGapClient({
-  initialRole = "",
-  initialSkills = "",
-}: {
-  initialRole?: string;
-  initialSkills?: string;
-}) {
-  const [currentSkills, setCurrentSkills] = useState(initialSkills);
-  const [targetRole, setTargetRole] = useState(initialRole);
+export function SkillGapClient() {
+  const [currentSkills, setCurrentSkills] = useSessionState("roadmap:currentSkills", "");
+  const [targetRole, setTargetRole] = useSessionState("roadmap:targetRole", "");
+  const [roadmap, setRoadmap] = useSessionState<Roadmap | null>("roadmap:result", null);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -181,7 +176,8 @@ export function SkillGapClient({
               <p>Ready to practice for this role?</p>
               <Link
                 className="primary-action"
-                href={`/interview?role=${encodeURIComponent(targetRole)}`}
+                href="/interview"
+                onClick={() => writeSession("interview:role", targetRole)}
               >
                 Practice interview for this role
               </Link>

@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
+import { useSessionState } from "@/lib/session";
+
+const EMPTY_QUESTIONS: Question[] = [];
+const EMPTY_ANSWERS: string[] = [];
+const EMPTY_EVALS: Evaluation[] = [];
 
 type Question = {
   question: string;
@@ -19,12 +24,12 @@ type Evaluation = {
 
 type Phase = "input" | "answering" | "results";
 
-export function InterviewClient({ initialRole = "" }: { initialRole?: string }) {
-  const [role, setRole] = useState(initialRole);
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
-  const [phase, setPhase] = useState<Phase>("input");
+export function InterviewClient() {
+  const [role, setRole] = useSessionState("interview:role", "");
+  const [questions, setQuestions] = useSessionState<Question[]>("interview:questions", EMPTY_QUESTIONS);
+  const [answers, setAnswers] = useSessionState<string[]>("interview:answers", EMPTY_ANSWERS);
+  const [evaluations, setEvaluations] = useSessionState<Evaluation[]>("interview:evaluations", EMPTY_EVALS);
+  const [phase, setPhase] = useSessionState<Phase>("interview:phase", "input");
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState("");
@@ -98,11 +103,9 @@ export function InterviewClient({ initialRole = "" }: { initialRole?: string }) 
   }
 
   function updateAnswer(index: number, value: string) {
-    setAnswers((prev) => {
-      const next = [...prev];
-      next[index] = value;
-      return next;
-    });
+    const next = [...answers];
+    next[index] = value;
+    setAnswers(next);
   }
 
   function findAnswer(question: string) {

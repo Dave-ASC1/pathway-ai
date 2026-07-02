@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
+import { readSession, useSessionState, writeSession } from "@/lib/session";
 
 const sampleResume = `David Ademoye
 Information Sciences and Technology student
@@ -163,13 +164,16 @@ function extractSkillsSection(resumeText: string): string {
   return "";
 }
 
+// Stable reference for the initial (empty) analysis so session snapshots match.
+const EMPTY_ANALYSIS: Analysis = analyzeResume("", "");
+
 export function ResumeCheckerClient() {
-  const [resume, setResume] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
-  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [resume, setResume] = useSessionState("resume:text", "");
+  const [jobDescription, setJobDescription] = useSessionState("resume:jd", "");
+  const [hasAnalyzed, setHasAnalyzed] = useSessionState("resume:hasAnalyzed", false);
+  const [analysis, setAnalysis] = useSessionState<Analysis>("resume:analysis", EMPTY_ANALYSIS);
+  const [analysisSource, setAnalysisSource] = useSessionState<"claude" | "local">("resume:source", "local");
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<Analysis>(() => analyzeResume("", ""));
-  const [analysisSource, setAnalysisSource] = useState<"claude" | "local">("local");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedName, setUploadedName] = useState<string | null>(null);
@@ -225,9 +229,14 @@ export function ResumeCheckerClient() {
         setHasAnalyzed(true);
       } finally {
         setIsLoading(false);
+        // Carry the resume's skills into the roadmap unless it already has skills.
+        const skills = extractSkillsSection(r);
+        if (skills && !readSession("roadmap:currentSkills", "")) {
+          writeSession("roadmap:currentSkills", skills);
+        }
       }
     },
-    [resume, jobDescription],
+    [resume, jobDescription, setAnalysis, setAnalysisSource, setHasAnalyzed],
   );
 
   const currentAnalysis = analysis;
@@ -435,14 +444,13 @@ export function ResumeCheckerClient() {
                   </Link>
                   <Link
                     className="text-action"
-                    href={(() => {
+                    href="/skill-gap"
+                    onClick={() => {
                       const skills =
                         extractSkillsSection(resume) ||
                         currentAnalysis.matchedKeywords.slice(0, 12).join(", ");
-                      return skills
-                        ? `/skill-gap?skills=${encodeURIComponent(skills.slice(0, 500))}`
-                        : "/skill-gap";
-                    })()}
+                      if (skills) writeSession("roadmap:currentSkills", skills);
+                    }}
                   >
                     Build a skill roadmap
                   </Link>

@@ -1362,6 +1362,41 @@ a {
   line-height: 1.5;
 }
 
+.path-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.9rem;
+}
+
+.continue-cta {
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  border-radius: 1.4rem;
+  background: rgba(239, 246, 255, 0.7);
+  padding: 1.3rem;
+}
+
+.continue-cta p {
+  margin: 0;
+  color: var(--deep-navy);
+  font-weight: 700;
+}
+
+.continue-block p {
+  margin: 0 0 0.6rem;
+  color: #475569;
+}
+
+.continue-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+
 .roadmap-stack {
   display: grid;
   gap: 1rem;

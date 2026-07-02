@@ -2,7 +2,13 @@ import Link from "next/link";
 import { AppShell } from "../components/AppShell";
 import { SkillGapClient } from "./skill-gap-client";
 
-export default function SkillGapPage() {
+export default async function SkillGapPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string }>;
+}) {
+  const { role } = await searchParams;
+
   return (
     <AppShell active="roadmap">
       <div className="app-topbar">
@@ -10,7 +16,7 @@ export default function SkillGapPage() {
           Back to dashboard
         </Link>
       </div>
-      <SkillGapClient />
+      <SkillGapClient initialRole={typeof role === "string" ? role : ""} />
     </AppShell>
   );
 }

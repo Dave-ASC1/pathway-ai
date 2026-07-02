@@ -2,7 +2,13 @@ import Link from "next/link";
 import { AppShell } from "../components/AppShell";
 import { InterviewClient } from "./interview-client";
 
-export default function InterviewPage() {
+export default async function InterviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ role?: string }>;
+}) {
+  const { role } = await searchParams;
+
   return (
     <AppShell active="interview">
       <div className="app-topbar">
@@ -10,7 +16,7 @@ export default function InterviewPage() {
           Back to dashboard
         </Link>
       </div>
-      <InterviewClient />
+      <InterviewClient initialRole={typeof role === "string" ? role : ""} />
     </AppShell>
   );
 }

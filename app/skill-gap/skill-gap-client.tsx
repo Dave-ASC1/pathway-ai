@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 
@@ -17,9 +18,9 @@ type Roadmap = {
   steps: RoadmapStep[];
 };
 
-export function SkillGapClient() {
+export function SkillGapClient({ initialRole = "" }: { initialRole?: string }) {
   const [currentSkills, setCurrentSkills] = useState("");
-  const [targetRole, setTargetRole] = useState("");
+  const [targetRole, setTargetRole] = useState(initialRole);
 
   const [isLoading, setIsLoading] = useState(false);
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
@@ -156,6 +157,16 @@ export function SkillGapClient() {
                 </li>
               ))}
             </ol>
+
+            <div className="continue-cta">
+              <p>Ready to practice for this role?</p>
+              <Link
+                className="primary-action"
+                href={`/interview?role=${encodeURIComponent(targetRole)}`}
+              >
+                Practice interview for this role
+              </Link>
+            </div>
           </div>
         )}
       </section>

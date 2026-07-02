@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 
@@ -369,6 +370,21 @@ export function ResumeCheckerClient() {
                 ))}
               </ul>
             </section>
+
+            {hasAnalyzed ? (
+              <section className="result-block continue-block">
+                <h2>Next step</h2>
+                <p>Now find roles that fit and build a plan to land them.</p>
+                <div className="continue-links">
+                  <Link className="text-action" href="/career-path">
+                    Explore career paths
+                  </Link>
+                  <Link className="text-action" href="/skill-gap">
+                    Build a skill roadmap
+                  </Link>
+                </div>
+              </section>
+            ) : null}
           </div>
         )}
       </aside>

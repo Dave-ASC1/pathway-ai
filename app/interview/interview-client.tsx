@@ -18,8 +18,8 @@ type Evaluation = {
 
 type Phase = "input" | "answering" | "results";
 
-export function InterviewClient() {
-  const [role, setRole] = useState("");
+export function InterviewClient({ initialRole = "" }: { initialRole?: string }) {
+  const [role, setRole] = useState(initialRole);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<string[]>([]);
   const [evaluations, setEvaluations] = useState<Evaluation[]>([]);

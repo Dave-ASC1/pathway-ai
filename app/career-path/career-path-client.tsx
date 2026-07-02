@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 
@@ -173,6 +174,21 @@ export function CareerPathClient() {
                 <div className="path-firststep">
                   <h3>Your first step</h3>
                   <p>{path.firstStep}</p>
+                </div>
+
+                <div className="path-actions">
+                  <Link
+                    className="text-action"
+                    href={`/skill-gap?role=${encodeURIComponent(path.title)}`}
+                  >
+                    Build a roadmap for this
+                  </Link>
+                  <Link
+                    className="text-action"
+                    href={`/interview?role=${encodeURIComponent(path.title)}`}
+                  >
+                    Practice interview
+                  </Link>
                 </div>
               </article>
             ))}

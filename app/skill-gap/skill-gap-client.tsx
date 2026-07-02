@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
+import { saveItem } from "@/lib/history";
 
 type RoadmapStep = {
   skill: string;
@@ -25,13 +26,20 @@ export function SkillGapClient({ initialRole = "" }: { initialRole?: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const canSubmit = currentSkills.trim().length > 3 && targetRole.trim().length > 1;
+
+  function handleSave() {
+    saveItem("roadmap", `Roadmap: ${targetRole}`, { targetRole, ...roadmap });
+    setSaved(true);
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSaved(false);
     try {
       const res = await fetch("/api/skill-gap", {
         method: "POST",
@@ -116,6 +124,11 @@ export function SkillGapClient({ initialRole = "" }: { initialRole?: string }) {
           </div>
         ) : (
           <div className="roadmap-stack">
+            <div className="save-toolbar">
+              <button className="save-button" type="button" onClick={handleSave} disabled={saved}>
+                {saved ? "Saved ✓" : "Save result"}
+              </button>
+            </div>
             <div className="roadmap-summary">
               <h2>Where you stand</h2>
               <p>{roadmap.summary}</p>

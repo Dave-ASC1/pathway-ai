@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PathwayLogo } from "./PathwayLogo";
 
-type ActiveModule = "dashboard" | "resume" | "career" | "roadmap" | "interview";
+type ActiveModule = "dashboard" | "resume" | "career" | "roadmap" | "interview" | "saved";
 
 const appLinks: { href: string; label: string; key: ActiveModule }[] = [
   { href: "/dashboard", label: "Dashboard", key: "dashboard" },
@@ -9,6 +9,7 @@ const appLinks: { href: string; label: string; key: ActiveModule }[] = [
   { href: "/career-path", label: "Career paths", key: "career" },
   { href: "/skill-gap", label: "Roadmap", key: "roadmap" },
   { href: "/interview", label: "Interview", key: "interview" },
+  { href: "/saved", label: "Saved", key: "saved" },
 ];
 
 type AppShellProps = {

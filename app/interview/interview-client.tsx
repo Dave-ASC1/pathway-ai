@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
+import { saveItem } from "@/lib/history";
 
 type Question = {
   question: string;
@@ -28,6 +29,7 @@ export function InterviewClient({ initialRole = "" }: { initialRole?: string }) 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const canGenerate = role.trim().length > 2;
   const answeredCount = answers.filter((a) => a.trim().length > 0).length;
@@ -87,6 +89,12 @@ export function InterviewClient({ initialRole = "" }: { initialRole?: string }) 
     setEvaluations([]);
     setPhase("input");
     setError(null);
+    setSaved(false);
+  }
+
+  function handleSave() {
+    saveItem("interview", `Interview: ${role}`, { role, averageScore, evaluations });
+    setSaved(true);
   }
 
   function updateAnswer(index: number, value: string) {
@@ -205,6 +213,11 @@ export function InterviewClient({ initialRole = "" }: { initialRole?: string }) 
             <div className="score-ring" aria-label={`Average interview score ${averageScore}%`}>
               <span>{averageScore}%</span>
               <p>Average score</p>
+            </div>
+            <div className="save-toolbar">
+              <button className="save-button" type="button" onClick={handleSave} disabled={saved}>
+                {saved ? "Saved ✓" : "Save result"}
+              </button>
             </div>
             {evaluations.map((ev, i) => (
               <article className="interview-question" key={ev.question}>

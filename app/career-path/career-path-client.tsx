@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
+import { saveItem } from "@/lib/history";
 
 type CareerPath = {
   title: string;
@@ -30,13 +31,20 @@ export function CareerPathClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [paths, setPaths] = useState<CareerPath[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
 
   const canSubmit = major.trim().length > 1 && interests.trim().length > 3;
+
+  function handleSave() {
+    saveItem("career", major ? `Career paths for ${major}` : "Career paths", { major, paths });
+    setSaved(true);
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSaved(false);
     try {
       const res = await fetch("/api/career-path", {
         method: "POST",
@@ -142,6 +150,11 @@ export function CareerPathClient() {
           </div>
         ) : (
           <div className="path-grid">
+            <div className="save-toolbar path-grid-toolbar">
+              <button className="save-button" type="button" onClick={handleSave} disabled={saved}>
+                {saved ? "Saved ✓" : "Save result"}
+              </button>
+            </div>
             {paths.map((path, index) => (
               <article className="path-card" key={path.title}>
                 <span className="path-number">{String(index + 1).padStart(2, "0")}</span>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
+import { saveItem } from "@/lib/history";
 
 const sampleResume = `David Ademoye
 Information Sciences and Technology student
@@ -141,6 +142,7 @@ export function ResumeCheckerClient() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadedName, setUploadedName] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canAnalyze = resume.trim().length > 40 && jobDescription.trim().length > 40;
@@ -173,6 +175,7 @@ export function ResumeCheckerClient() {
   const runAnalysis = useCallback(
     async (r: string = resume, jd: string = jobDescription) => {
       setIsLoading(true);
+      setSaved(false);
       try {
         const res = await fetch("/api/analyze-resume", {
           method: "POST",
@@ -197,6 +200,13 @@ export function ResumeCheckerClient() {
   );
 
   const currentAnalysis = analysis;
+
+  function handleSave() {
+    const firstLine = jobDescription.split("\n").map((l) => l.trim()).find(Boolean);
+    const title = firstLine ? firstLine.slice(0, 60) : "Resume analysis";
+    saveItem("resume", title, currentAnalysis);
+    setSaved(true);
+  }
 
   return (
     <div className="checker-layout">
@@ -319,6 +329,19 @@ export function ResumeCheckerClient() {
           </div>
         ) : (
           <div className="results-stack">
+            {hasAnalyzed ? (
+              <div className="save-toolbar">
+                <button
+                  className="save-button"
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saved}
+                >
+                  {saved ? "Saved ✓" : "Save result"}
+                </button>
+              </div>
+            ) : null}
+
             <section className="result-block">
               <h2>Matched keywords</h2>
               <div className="keyword-list">

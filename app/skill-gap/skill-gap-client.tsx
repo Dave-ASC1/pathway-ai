@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
-import { useSessionState, writeSession } from "@/lib/session";
+import { readSession, useSessionState, writeSession } from "@/lib/session";
 
 type RoadmapStep = {
   skill: string;
@@ -52,6 +52,10 @@ export function SkillGapClient() {
         throw new Error(data.error ?? "Something went wrong.");
       }
       setRoadmap(data);
+      // Carry the target role into the interview coach unless it already has input.
+      if (targetRole.trim() && !readSession("interview:role", "")) {
+        writeSession("interview:role", targetRole);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
       setRoadmap(null);

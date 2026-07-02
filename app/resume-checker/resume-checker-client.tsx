@@ -234,6 +234,10 @@ export function ResumeCheckerClient() {
         if (skills && !readSession("roadmap:currentSkills", "")) {
           writeSession("roadmap:currentSkills", skills);
         }
+        // Carry the job description into the interview coach unless it already has input.
+        if (jd.trim() && !readSession("interview:role", "")) {
+          writeSession("interview:role", jd);
+        }
       }
     },
     [resume, jobDescription, setAnalysis, setAnalysisSource, setHasAnalyzed],

@@ -132,6 +132,37 @@ function analyzeResume(resume: string, jobDescription: string): Analysis {
   };
 }
 
+// Pull the Skills section out of a pasted resume so it can be reused elsewhere.
+function extractSkillsSection(resumeText: string): string {
+  const lines = resumeText.split("\n");
+  const inlineHeading = /^(technical skills|core skills|key skills|skills)\s*[:\-–]\s*(.+)$/i;
+  const blockHeading = /^(technical skills|core skills|key skills|skills)\s*:?\s*$/i;
+  const nextSection =
+    /^(education|experience|projects?|work|employment|certifications?|awards?|activities|leadership|summary|objective|profile|interests|volunteer|references)\b/i;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    const inline = line.match(inlineHeading);
+    if (inline) return inline[2].trim();
+
+    if (blockHeading.test(line)) {
+      const collected: string[] = [];
+      for (let j = i + 1; j < lines.length && collected.length < 5; j++) {
+        const next = lines[j].trim();
+        if (!next) {
+          if (collected.length) break;
+          continue;
+        }
+        if (nextSection.test(next)) break;
+        collected.push(next);
+      }
+      if (collected.length) return collected.join(", ");
+    }
+  }
+  return "";
+}
+
 export function ResumeCheckerClient() {
   const [resume, setResume] = useState("");
   const [jobDescription, setJobDescription] = useState("");
@@ -404,13 +435,14 @@ export function ResumeCheckerClient() {
                   </Link>
                   <Link
                     className="text-action"
-                    href={
-                      currentAnalysis.matchedKeywords.length
-                        ? `/skill-gap?skills=${encodeURIComponent(
-                            currentAnalysis.matchedKeywords.slice(0, 12).join(", "),
-                          )}`
-                        : "/skill-gap"
-                    }
+                    href={(() => {
+                      const skills =
+                        extractSkillsSection(resume) ||
+                        currentAnalysis.matchedKeywords.slice(0, 12).join(", ");
+                      return skills
+                        ? `/skill-gap?skills=${encodeURIComponent(skills.slice(0, 500))}`
+                        : "/skill-gap";
+                    })()}
                   >
                     Build a skill roadmap
                   </Link>

@@ -4,7 +4,7 @@ import { PathwayLogo } from "./PathwayLogo";
 type ActiveModule = "dashboard" | "resume" | "career" | "roadmap" | "interview" | "saved";
 
 const appLinks: { href: string; label: string; key: ActiveModule }[] = [
-  { href: "/dashboard", label: "Dashboard", key: "dashboard" },
+  { href: "/dashboard", label: "Journey", key: "dashboard" },
   { href: "/resume-checker", label: "Resume checker", key: "resume" },
   { href: "/career-path", label: "Career paths", key: "career" },
   { href: "/skill-gap", label: "Roadmap", key: "roadmap" },

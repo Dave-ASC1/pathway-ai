@@ -7,7 +7,7 @@ export default function ResumeCheckerPage() {
     <AppShell active="resume">
       <div className="app-topbar">
         <Link className="text-action" href="/dashboard">
-          Back to dashboard
+          Back to journey
         </Link>
       </div>
       <ResumeCheckerClient />

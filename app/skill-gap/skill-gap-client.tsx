@@ -72,10 +72,7 @@ export function SkillGapClient() {
             <p className="app-kicker">Skill Gap Roadmap</p>
             <h1>Build the skills that get you hired.</h1>
           </div>
-          <p>
-            List what you can do today and the role you want. Pathway AI will
-            map the gap into a clear, prioritized learning plan you can follow.
-          </p>
+          <p>List your skills and target role. Get a step-by-step plan.</p>
         </div>
 
         <form className="checker-form" onSubmit={handleSubmit}>

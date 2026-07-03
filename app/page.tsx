@@ -4,32 +4,28 @@ const modules = [
   {
     label: "01",
     title: "ATS Resume Checker",
-    description:
-      "Compare your resume with a target job description, identify missing keywords, and receive specific resume improvement suggestions.",
+    description: "Match your resume to a job and fix what's missing.",
     href: "/resume-checker",
     available: true,
   },
   {
     label: "02",
     title: "Career Path Explorer",
-    description:
-      "Use your profile, skills, and interests to discover three realistic career paths, each with role progression and the skills it needs.",
+    description: "Discover three realistic career paths built for you.",
     href: "/career-path",
     available: true,
   },
   {
     label: "03",
     title: "Skill Gap Roadmap",
-    description:
-      "Turn a target role into a clear, prioritized learning plan with practical tasks, resource types, and time estimates.",
+    description: "Turn a target role into a step-by-step learning plan.",
     href: "/skill-gap",
     available: true,
   },
   {
     label: "04",
     title: "Mock Interview Coach",
-    description:
-      "Practice role-based interview questions and receive structured feedback that improves confidence and clarity.",
+    description: "Practice real questions and get honest feedback.",
     href: "/interview",
     available: true,
   },
@@ -45,8 +41,8 @@ const journeySteps = [
 
 const studentSignals = [
   "Limited experience does not mean no value",
-  "Coursework and projects can become stronger resume proof",
-  "Career direction should be realistic, not randomly optimistic",
+  "Coursework and projects count as real experience",
+  "Career direction should be realistic, not just hopeful",
 ];
 
 const trustPrinciples = [
@@ -113,14 +109,13 @@ export default function Home() {
         </h1>
 
         <p className="hero-copy">
-          Pathway AI helps students improve their resume, discover realistic
-          career paths, close skill gaps, and practice interviews before the
-          real opportunity arrives.
+          Improve your resume, explore career paths, close skill gaps, and
+          practice interviews. All in one place.
         </p>
 
         <div className="hero-actions" aria-label="Landing page actions">
           <a href="/dashboard" className="primary-action">
-            Open dashboard
+            Start your journey
           </a>
           <a href="#modules" className="secondary-action">
             Explore modules
@@ -128,8 +123,7 @@ export default function Home() {
         </div>
 
         <div className="hero-note">
-          Built for students with limited experience who need direction,
-          preparation, and confidence.
+          For students who need direction, not just advice.
         </div>
       </section>
 
@@ -147,7 +141,7 @@ export default function Home() {
           <div className="preview-content">
             <aside className="preview-sidebar">
               <PathwayLogo showText={false} />
-              <div className="sidebar-pill active">Dashboard</div>
+              <div className="sidebar-pill active">Journey</div>
               <div className="sidebar-pill">Resume</div>
               <div className="sidebar-pill">Career</div>
               <div className="sidebar-pill">Roadmap</div>
@@ -159,10 +153,7 @@ export default function Home() {
                 <div>
                   <p className="preview-kicker">Career workspace</p>
                   <h2>Your path, organized</h2>
-                  <p>
-                    Resume insights, role direction, skill planning, and
-                    interview practice in one place.
-                  </p>
+                  <p>Resume, career, skills, and interview prep in one place.</p>
                 </div>
 
                 <div className="score-card" aria-label="Resume insights status">
@@ -193,10 +184,7 @@ export default function Home() {
               <div className="loading-card">
                 <div>
                   <span className="loading-label">Powered by Pathway AI</span>
-                  <p>
-                    Real-time analysis built for your situation, so your feedback is
-                    always specific and actionable.
-                  </p>
+                  <p>Feedback built for your exact situation.</p>
                 </div>
                 <PathwayLoader />
               </div>
@@ -211,10 +199,8 @@ export default function Home() {
           <h2>Career readiness is scattered across too many tools.</h2>
           <div className="section-copy-stack">
             <p>
-              Students often jump between resume checkers, job boards, skill
-              tutorials, and interview prep tools. Pathway AI connects those
-              steps into one guided workspace so students know what to fix, what
-              to learn, and how to prepare next.
+              Resume checkers, job boards, tutorials, interview prep. Usually
+              scattered across five tools. Pathway AI puts them in one flow.
             </p>
             <div className="signal-list" aria-label="Student support principles">
               {studentSignals.map((signal) => (
@@ -236,16 +222,11 @@ export default function Home() {
               <span>{String(index + 1).padStart(2, "0")}</span>
               <h3>{step}</h3>
               <p>
-                {index === 0 &&
-                  "Students begin with the resume they already have, whether it is polished or still in progress."}
-                {index === 1 &&
-                  "The resume is compared against a real role so the feedback is specific, not generic."}
-                {index === 2 &&
-                  "Pathway AI recommends realistic paths based on the student’s profile and current skills."}
-                {index === 3 &&
-                  "The selected role becomes a focused learning plan with practical next steps."}
-                {index === 4 &&
-                  "Students practice explaining their experience before entering a real interview."}
+                {index === 0 && "Start with the resume you already have."}
+                {index === 1 && "Compared against a real job, not generic tips."}
+                {index === 2 && "Get three realistic career paths that fit you."}
+                {index === 3 && "Turn your target role into a skill plan."}
+                {index === 4 && "Practice answering before the real interview."}
               </p>
             </article>
           ))}
@@ -256,11 +237,7 @@ export default function Home() {
         <div className="section-label">Core modules</div>
         <div className="section-intro">
           <h2>Four focused tools, one connected student journey.</h2>
-          <p>
-            Each module builds on the last. Resume feedback informs your career direction,
-            which shapes your skill roadmap, which prepares you for the interview.
-            No jumping between apps. No starting over.
-          </p>
+          <p>Each tool feeds the next. No jumping between apps, no starting over.</p>
         </div>
         <div className="module-grid">
           {modules.map((module) => (

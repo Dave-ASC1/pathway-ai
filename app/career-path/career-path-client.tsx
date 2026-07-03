@@ -73,10 +73,7 @@ export function CareerPathClient() {
             <p className="app-kicker">Career Path Explorer</p>
             <h1>Find career directions worth pursuing.</h1>
           </div>
-          <p>
-            Tell us about yourself and Pathway AI will map three realistic career
-            paths, including the roles, the skills, and your first step toward each.
-          </p>
+          <p>Tell us about yourself. Get three real paths, each with a first step.</p>
         </div>
 
         <form className="checker-form" onSubmit={handleSubmit}>

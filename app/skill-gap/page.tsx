@@ -7,7 +7,7 @@ export default function SkillGapPage() {
     <AppShell active="roadmap">
       <div className="app-topbar">
         <Link className="text-action" href="/dashboard">
-          Back to dashboard
+          Back to journey
         </Link>
       </div>
       <SkillGapClient />

@@ -122,11 +122,7 @@ export function InterviewClient() {
               <p className="app-kicker">Mock Interview Coach</p>
               <h1>Practice the interview before it counts.</h1>
             </div>
-            <p>
-              Enter a role or paste a job description. Pathway AI will ask you
-              real interview questions, then review your answers with a score and
-              specific coaching.
-            </p>
+            <p>Enter a role. Answer real questions. Get scored, honest feedback.</p>
           </div>
 
           <form className="checker-form" onSubmit={handleGenerate}>

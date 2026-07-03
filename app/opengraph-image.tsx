@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Pathway AI — go from career confusion to a clear, confident plan";
+export const alt = "Pathway AI: go from career confusion to a clear, confident plan";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 

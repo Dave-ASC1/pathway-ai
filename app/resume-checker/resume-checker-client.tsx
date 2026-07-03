@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { PathwayLoader } from "../components/PathwayLoader";
+import { ScoreGauge } from "../components/ScoreGauge";
 import { saveItem } from "@/lib/history";
 import { readSession, useSessionState, writeSession } from "@/lib/session";
 
@@ -262,10 +263,10 @@ export function ResumeCheckerClient() {
           </div>
           <p>
             {!hasAnalyzed
-              ? "Paste your resume and a target job description to get a match score and specific improvements."
+              ? "Paste your resume and the job. Get a score and what to fix."
               : analysisSource === "claude"
-                ? "Powered by Pathway AI for advanced analysis of your resume against the job description."
-                : "Analyzed using keyword matching and section detection."}
+                ? "Powered by Pathway AI."
+                : "Analyzed using keyword matching."}
           </p>
         </div>
 
@@ -352,9 +353,15 @@ export function ResumeCheckerClient() {
       </section>
 
       <aside className="results-panel" aria-live="polite">
-        <div className="score-ring" aria-label={`Resume match score ${currentAnalysis.score}%`}>
-          <span>{hasAnalyzed ? currentAnalysis.score : "--"}%</span>
-          <p>Match score</p>
+        <div className="score-ring" aria-label={`Resume match score ${hasAnalyzed ? currentAnalysis.score : 0}%`}>
+          {hasAnalyzed ? (
+            <ScoreGauge score={currentAnalysis.score} />
+          ) : (
+            <>
+              <span>--%</span>
+              <p>Match score</p>
+            </>
+          )}
         </div>
 
         {isLoading ? (

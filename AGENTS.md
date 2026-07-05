@@ -182,7 +182,9 @@ asked; it's a known, accepted gap, not a bug.
 
 ```
 app/
-  page.tsx                    — public landing page (marketing, short copy)
+  page.tsx                    — public landing page: logo, one headline, the
+                                JourneyBoard, and a footer (the old marketing
+                                sections were removed in the journey-board redesign)
   layout.tsx                  — root layout, metadata, Vercel Analytics
   globals.css                 — ALL styling lives here, no CSS modules
   error.tsx / global-error.tsx / not-found.tsx  — branded error/404 states
@@ -195,10 +197,15 @@ app/
                                   stair pattern), reused across every module's
                                   loading state
     ScoreGauge.tsx             — circular color-graded score ring (resume checker)
+    JourneyBoard.tsx           — the game-board entry: a switchback road with 4
+                                  progress-aware module stops, an auto-driving/
+                                  hover car, and fireworks at the goal. Rendered
+                                  by BOTH page.tsx (context="landing") and the
+                                  dashboard (context="workspace"). See redesign below.
   dashboard/
-    page.tsx + dashboard-client.tsx   — "Journey" hub: colorful step-path
-                                         tracker, NOT a metrics dashboard (see
-                                         Recent redesign below)
+    page.tsx + dashboard-client.tsx   — "Journey" hub. dashboard-client is now
+                                         just <JourneyBoard context="workspace" />
+                                         (an "X of 4 steps done" heading + the board)
   resume-checker/  career-path/  skill-gap/  interview/  saved/
     page.tsx (server wrapper, just mounts AppShell + client component)
     <name>-client.tsx (all logic, "use client")
@@ -211,27 +218,46 @@ the other.
 
 ---
 
-## Recent redesign (commit 6c20417), read this before touching the dashboard
+## Journey board redesign (current), read this before touching the entry pages
 
-The user's capstone professor reviewed the site and said it was too wordy and
-should feel more like a guided game (showed a snake-and-ladder board as
-inspiration) with a colorful dashboard for results. After clarifying scope with
-the user, the agreed direction (not the literal board game) was:
+This is the current state and supersedes an earlier step-path dashboard. The
+professor said the site was too wordy and should feel like a simple, stylized
+game the student plays to move through the four tools. After confirming scope
+(a styled board, NOT a literal dice-and-tiles game; merge landing and dashboard
+into one experience), the built direction is:
 
-- Replace the old text-and-cards dashboard entirely with a step-path
-  tracker: 4 colored circular nodes (one per module) connected by a line,
-  each showing a number, a checkmark if that module has been completed this
-  session, and a pulse animation on the next incomplete step. Clicking any
-  node navigates to that tool.
-- Add a circular animated score gauge (red, amber, green by score band) to
-  the resume checker results, replacing the plain percentage text.
-- Trim copy sitewide (see Brand rules above).
+- A shared component, `app/components/JourneyBoard.tsx`, renders a winding
+  "switchback road" (smooth C1-continuous bends, echoing the logo's ascending
+  4-dot line) with the four modules as color-coded stops (resume=blue,
+  career=green, roadmap=amber, interview=purple) ending at a navy "Career-ready"
+  star goal. Stops fill with a checkmark and pulse the next incomplete one,
+  computed from the same `lib/session.ts` progress keys (`resume:hasAnalyzed`,
+  `career:result`, `roadmap:result`, `interview:phase`). Stops are real
+  `<a href>` links (full-page navigation, crawlable, keyboard-accessible).
+- BOTH `/` (landing) and `/dashboard` render this same board — `page.tsx` with
+  `context="landing"` (static headline, no sidebar), `dashboard-client.tsx` with
+  `context="workspace"` (an "X of 4 steps done" heading, inside AppShell). The
+  old wordy landing sections (hero, product preview, module cards, privacy) were
+  deleted.
+- An animated top-down car drives slowly along the road: once automatically
+  ~0.7s after page load (desktop only, skipped on mobile and for
+  `prefers-reduced-motion`), and again on hover/focus of the "Start here" button.
+  It pauses at each stop (the stop scales up), while a "Click to begin" hint
+  fades in and the button pulses. When it reaches the goal, the star pops and
+  bursts into yellow fireworks.
+- Two layouts in the component: `WIDE` (desktop switchback) and `TALL` (a
+  vertical version swapped in by CSS at max-width 560px so labels stay legible).
+- Tunable animation constants at the top of the file: `CAR_TRAVEL_MS` (18000,
+  intentionally slow), `CAR_PAUSE_MS`, `CAR_GOAL_HOLD_MS`, `AUTO_PLAY_DELAY_MS`.
+  All board styling is in `globals.css` under `.journey-board` / `.jb-*`.
+- The resume checker's circular animated score gauge (`ScoreGauge.tsx`, red/
+  amber/green by band) is still in place from the earlier redesign.
 
-**The literal snake-and-ladder board (dice, tiles, detours) was explicitly
-NOT built**, it was considered and deliberately deferred as a much bigger,
+**The literal snake-and-ladder board (dice, tiles, random movement) was
+explicitly NOT built** — considered and deliberately deferred as a much bigger,
 lower-value build that maps less cleanly onto 4 real tools. If the user or
 professor asks for the literal board-game version later, that is new scope,
-not a bug fix, confirm before building it.
+confirm before building it.
 
 ---
 

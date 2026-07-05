@@ -13,7 +13,9 @@ This file also has two siblings worth knowing about:
 - **`/Users/kingdavid/pathway-ai/AGENTS.md`** — a technical architecture
   reference written for any coding agent (Codex, etc.) working in this repo.
   It covers file structure, code patterns, and brand rules in more implementation
-  detail than this document. Read both.
+  detail than this document. Read both. It was updated alongside this document
+  for the interactive journey board (story item #12 below), so the two should
+  agree; if they ever diverge, trust the live code.
 
 ---
 
@@ -181,7 +183,8 @@ decisions look arbitrary until you know the history.
      limiter slows abuse but doesn't hard-stop it, this is an accepted,
      known gap, not a bug to silently "fix" with Upstash unless asked).
 
-10. **Most recent major change: the "journey redesign."** The user's professor
+10. **The first "journey redesign"** (later superseded by the interactive
+    journey board in #12 — kept here for history). The user's professor
     reviewed the site and said it was too wordy and should feel more like a
     guided game — showed a snake-and-ladder board as inspiration, wanted a
     colorful dashboard. This was ambiguous enough (a literal board game vs. a
@@ -214,6 +217,59 @@ decisions look arbitrary until you know the history.
     Codex or any other coding agent — architecture patterns, brand rules,
     gotchas, in more code-level detail than this narrative document.
 
+12. **Replaced the whole entry experience with an interactive "journey board"
+    game** (commits `a5a2261`, `e58f004`, `20f7989`). This supersedes the
+    step-path tracker from #10. The professor said the site was still too wordy
+    and wanted it to feel like a simple, stylized game the student plays to move
+    through the four tools. After confirming scope with sharp multiple-choice
+    questions (a styled board, NOT a literal dice-and-tiles game; merge landing
+    and dashboard into one experience), the built direction was:
+    - A new shared component **`app/components/JourneyBoard.tsx`** renders a
+      winding "switchback road" (smooth C1-continuous bends, echoing the logo's
+      ascending 4-dot line) with the four modules as color-coded stops
+      (resume=blue, career=green, roadmap=amber, interview=purple) ending at a
+      navy "Career-ready" star goal. Stops fill with a checkmark and pulse the
+      next one, computed from the same `lib/session.ts` progress keys the old
+      dashboard read (`resume:hasAnalyzed`, `career:result`, `roadmap:result`,
+      `interview:phase`).
+    - **Both `/` (landing) and `/dashboard` now render this same board** — the
+      merge the user asked for. The old wordy landing page (hero, product
+      preview, module cards, privacy) was deleted; the landing is now just the
+      logo, one headline, the board, and a small footer.
+      `app/dashboard/dashboard-client.tsx` is now a one-liner rendering
+      `<JourneyBoard context="workspace" />` (shows an "X of 4 steps done"
+      heading, still inside `AppShell`); the landing renders
+      `<JourneyBoard context="landing" />` (static headline, no sidebar). Stops
+      are real `<a href>` links (crawlable, keyboard-accessible); navigation is
+      full-page, not client-side.
+    - **An animated top-down car** drives slowly along the road: once
+      automatically about 0.7s after page load (desktop only — skipped on mobile
+      and for `prefers-reduced-motion`), and again whenever the user hovers or
+      focuses the "Start here" button. It pauses at each stop (the stop scales
+      up), while a "Click to begin" hint fades in and the button pulses to urge
+      the click. The car rotates to follow the road's tangent.
+    - **When the car reaches the goal, the star pops and bursts into yellow
+      fireworks** (a ring of ~20 gold sparks plus a flash), then fades back to
+      idle leaving the next step pulsing.
+    - **A separate vertical layout** (`TALL` in JourneyBoard.tsx, swapped in by
+      CSS at max-width 560px) renders on phones so labels stay legible; the wide
+      switchback (`WIDE`) is desktop. No horizontal overflow at 390px (checked).
+    - **Tunable animation constants** live at the top of `JourneyBoard.tsx`:
+      `CAR_TRAVEL_MS` (18000 — the user explicitly wanted a slow,
+      attention-holding pace, and pushed back twice on faster values),
+      `CAR_PAUSE_MS` (1100), `CAR_GOAL_HOLD_MS` (950), `AUTO_PLAY_DELAY_MS`
+      (700). All board styling is in `globals.css` under the `.journey-board` /
+      `.jb-*` classes.
+    - **Same batch, two follow-up cleanups the user requested:** (a) updated the
+      OpenGraph image headline + alt and the page `<title>` from the old "career
+      confusion" / "One Stop Shop to Your Career Goals" copy to "Reach
+      career-ready in 4 steps" so link-share previews match the site
+      (`app/opengraph-image.tsx`, `app/layout.tsx`); (b) removed ~726 lines of
+      now-dead landing and old-dashboard CSS from `globals.css` (2539 -> 1813
+      lines), keeping every class the tool pages still use (buttons, loader,
+      brand mark, app shell, workspace headings). Verified a tool page still
+      renders after trimming those shared grouped selectors.
+
 ---
 
 ## Architecture quick reference (see AGENTS.md for full detail)
@@ -240,8 +296,19 @@ app/components/AppShell.tsx     — sidebar nav + layout wrapper for all app pag
 app/components/PathwayLogo.tsx  — logo, links to "/"
 app/components/PathwayLoader.tsx — branded loading animation, used everywhere
 app/components/ScoreGauge.tsx   — circular score ring, resume checker
+app/components/JourneyBoard.tsx — the game-board entry: switchback road, four
+                                  progress-aware stops, auto-driving/hover car,
+                                  fireworks at the goal. Rendered by BOTH the
+                                  landing page (context="landing") and the
+                                  dashboard (context="workspace"). Reads
+                                  lib/session.ts for progress. WIDE (desktop) +
+                                  TALL (mobile) layouts. Animation constants at
+                                  top of file. See story item #12.
 
-app/dashboard/  app/resume-checker/  app/career-path/  app/skill-gap/  app/interview/  app/saved/
+app/page.tsx        — landing: logo + one headline + <JourneyBoard/> + footer.
+app/dashboard/      — page.tsx mounts AppShell + dashboard-client.tsx, which is
+                      now just <JourneyBoard context="workspace" />.
+app/resume-checker/  app/career-path/  app/skill-gap/  app/interview/  app/saved/
   page.tsx (server wrapper, mounts AppShell + client) + <name>-client.tsx (logic)
 ```
 
@@ -319,12 +386,15 @@ for portability to any other context:
 ## How to resume productively
 
 1. `cd /Users/kingdavid/pathway-ai && git log --oneline -20` to see exactly
-   what's landed since this document was written — it may already be stale
-   the same way the previous handoff was.
+   what's landed since this document was written. As of this update, HEAD is
+   `20f7989` ("Remove CSS left unused after the journey-board redesign") and
+   everything through it is committed, pushed to `main`, and live on Vercel.
 2. `git status --short` — check for uncommitted work before assuming a clean
    slate.
 3. Confirm production is in sync: `git rev-parse --short origin/main` should
-   match what's actually live (spot-check a recent feature via curl against
-   `https://pathway-aiapp.vercel.app`).
+   match what's actually live. Spot-check the journey board (the current entry
+   experience): `curl -s https://pathway-aiapp.vercel.app/ | grep -o "Reach
+   career-ready in 4 steps"` should return a hit, and the old "One Stop Shop" /
+   "career confusion" copy should be gone.
 4. Ask the user what they want to work on next — don't assume the "What's
    left" list above reflects their current priority.

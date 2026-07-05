@@ -4,7 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const MAX_FIELD_LENGTH = 20000;
 
-type Section = { label: string; present: boolean };
+type Section = { label: string; score: number };
 
 type Analysis = {
   score: number;
@@ -41,9 +41,14 @@ function extractKeywords(jobDescription: string) {
     .map(([w]) => w);
 }
 
-function includesAny(text: string, terms: string[]) {
+// Scores a section 0-100 from how many of its trigger terms show up in the
+// resume, so the local (non-AI) fallback can still show a progress bar
+// instead of a flat yes/no.
+function sectionScore(text: string, terms: string[]): number {
   const lower = text.toLowerCase();
-  return terms.some((t) => lower.includes(t));
+  const hits = terms.filter((t) => lower.includes(t)).length;
+  if (hits === 0) return 20;
+  return Math.min(100, Math.round(35 + (hits / terms.length) * 65));
 }
 
 function localAnalyze(resume: string, jobDescription: string): Analysis {
@@ -54,24 +59,26 @@ function localAnalyze(resume: string, jobDescription: string): Analysis {
   const matchRatio = keywords.length ? matchedKeywords.length / keywords.length : 0;
 
   const sections: Section[] = [
-    { label: "Education", present: includesAny(resume, ["education", "university", "college"]) },
-    { label: "Projects", present: includesAny(resume, ["project", "portfolio", "built", "designed"]) },
-    { label: "Skills", present: includesAny(resume, ["skills", "tools", "technologies"]) },
-    { label: "Experience", present: includesAny(resume, ["experience", "intern", "work", "volunteer"]) },
-    { label: "Impact", present: includesAny(resume, ["improved", "increased", "reduced", "%", "users"]) },
+    { label: "Education", score: sectionScore(resume, ["education", "university", "college"]) },
+    { label: "Projects", score: sectionScore(resume, ["project", "portfolio", "built", "designed"]) },
+    { label: "Skills", score: sectionScore(resume, ["skills", "tools", "technologies"]) },
+    { label: "Experience", score: sectionScore(resume, ["experience", "intern", "work", "volunteer"]) },
+    { label: "Impact", score: sectionScore(resume, ["improved", "increased", "reduced", "%", "users"]) },
   ];
 
-  const sectionScore = sections.filter((s) => s.present).length / sections.length;
-  const score = Math.round(matchRatio * 72 + sectionScore * 28);
+  const avgSectionScore = sections.reduce((sum, s) => sum + s.score, 0) / sections.length / 100;
+  const score = Math.round(matchRatio * 72 + avgSectionScore * 28);
+
+  const findSection = (label: string) => sections.find((s) => s.label === label)?.score ?? 0;
 
   const strengths = [
     matchedKeywords.length > 0
       ? `The resume already matches ${matchedKeywords.length} important role keyword${matchedKeywords.length === 1 ? "" : "s"}.`
       : "The resume has a foundation, but it needs more language from the target role.",
-    sections.find((s) => s.label === "Projects")?.present
+    findSection("Projects") >= 60
       ? "Project work is visible, which helps students with limited formal experience show proof of ability."
       : "Adding project work would make the resume stronger for student-level roles.",
-    sections.find((s) => s.label === "Skills")?.present
+    findSection("Skills") >= 60
       ? "The skills section helps recruiters quickly understand the student's toolset."
       : "A dedicated skills section would make the resume easier to scan.",
   ];
@@ -80,10 +87,10 @@ function localAnalyze(resume: string, jobDescription: string): Analysis {
     missingKeywords.length > 0
       ? `Add truthful examples using missing keywords such as ${missingKeywords.slice(0, 5).join(", ")}.`
       : "Keyword coverage is strong. Focus next on clearer outcomes and stronger bullets.",
-    sections.find((s) => s.label === "Impact")?.present
+    findSection("Impact") >= 60
       ? "Keep impact language visible and connect each result to a project or work activity."
       : "Add measurable outcomes where possible, such as users supported, reports built, time saved, or errors reduced.",
-    sections.find((s) => s.label === "Experience")?.present
+    findSection("Experience") >= 60
       ? "Make sure experience bullets begin with action verbs and connect directly to the job description."
       : "If formal work experience is limited, add class projects, volunteer work, or campus leadership as experience.",
   ];
@@ -104,11 +111,11 @@ Return ONLY valid JSON — no markdown fences, no explanation, just the raw JSON
   "matchedKeywords": ["keyword1", "keyword2", ...],
   "missingKeywords": ["keyword1", "keyword2", ...],
   "sections": {
-    "Education": <true|false>,
-    "Experience": <true|false>,
-    "Projects": <true|false>,
-    "Skills": <true|false>,
-    "Impact": <true|false>
+    "Education": <integer 0-100>,
+    "Experience": <integer 0-100>,
+    "Projects": <integer 0-100>,
+    "Skills": <integer 0-100>,
+    "Impact": <integer 0-100>
   },
   "strengths": ["strength1", "strength2", "strength3"],
   "improvements": ["improvement1", "improvement2", "improvement3"]
@@ -117,7 +124,7 @@ Return ONLY valid JSON — no markdown fences, no explanation, just the raw JSON
 Rules:
 - matchedKeywords: up to 10 keywords from the job description that appear in the resume
 - missingKeywords: up to 10 important keywords from the job description absent from the resume
-- sections: true if that section type is clearly present in the resume
+- sections: score each 0-100 for how strong and complete that section is, not just whether it exists
 - strengths: exactly 3 specific, student-focused observations about what the resume does well
 - improvements: exactly 3 specific, actionable recommendations to better match the target role
 - score: overall ATS match quality considering keyword overlap, section completeness, and relevance
@@ -139,12 +146,13 @@ ${jobDescription}`;
   const parsed = JSON.parse(raw);
 
   // Normalise sections from object → array shape the UI expects
+  const clampScore = (value: unknown) => Math.max(0, Math.min(100, Number(value) || 0));
   const sections: Section[] = [
-    { label: "Education", present: Boolean(parsed.sections?.Education) },
-    { label: "Experience", present: Boolean(parsed.sections?.Experience) },
-    { label: "Projects", present: Boolean(parsed.sections?.Projects) },
-    { label: "Skills", present: Boolean(parsed.sections?.Skills) },
-    { label: "Impact", present: Boolean(parsed.sections?.Impact) },
+    { label: "Education", score: clampScore(parsed.sections?.Education) },
+    { label: "Experience", score: clampScore(parsed.sections?.Experience) },
+    { label: "Projects", score: clampScore(parsed.sections?.Projects) },
+    { label: "Skills", score: clampScore(parsed.sections?.Skills) },
+    { label: "Impact", score: clampScore(parsed.sections?.Impact) },
   ];
 
   return {

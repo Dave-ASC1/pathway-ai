@@ -347,7 +347,9 @@ function Board({ layout, doneMap, nextId, startHref, interactive = false }: Boar
   );
 }
 
-export function JourneyBoard({ context = "landing" }: { context?: "landing" | "workspace" }) {
+type Context = "landing" | "workspace" | "embed";
+
+export function JourneyBoard({ context = "landing" }: { context?: Context }) {
   const [resumeDone] = useSessionState("resume:hasAnalyzed", false);
   const [careerResult] = useSessionState<unknown>("career:result", null);
   const [roadmapResult] = useSessionState<unknown>("roadmap:result", null);
@@ -366,19 +368,20 @@ export function JourneyBoard({ context = "landing" }: { context?: "landing" | "w
   const startHref = allDone ? "/saved" : nextStop.href;
   const nextId = nextStop ? nextStop.id : null;
 
-  const kicker = context === "workspace" ? "Your journey" : "Free · no sign up";
+  const kicker = context === "landing" ? "Free · no sign up" : "Your journey";
   const heading =
-    context === "workspace"
-      ? allDone
+    context === "landing"
+      ? "From confused to career-ready in 4 steps."
+      : allDone
         ? "All 4 steps done."
-        : `${completedCount} of 4 steps done.`
-      : "From confused to career-ready in 4 steps.";
+        : `${completedCount} of 4 steps done.`;
+  const HeadingTag = context === "embed" ? "h2" : "h1";
 
   return (
-    <div className="journey-board">
+    <div className={`journey-board${context === "embed" ? " journey-board-embed" : ""}`}>
       <div className="journey-board-heading">
         <p className="journey-board-kicker">{kicker}</p>
-        <h1>{heading}</h1>
+        <HeadingTag>{heading}</HeadingTag>
         {context === "landing" ? (
           <p className="journey-board-sub">
             Resume checks, career paths, skill roadmaps, and interview practice, all in one free tool.

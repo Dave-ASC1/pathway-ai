@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
+import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { ScoreGauge } from "../components/ScoreGauge";
+import { SectionRadarChart } from "../components/SectionRadarChart";
 import { saveItem } from "@/lib/history";
 import { readSession, useSessionState, writeSession } from "@/lib/session";
 
@@ -52,7 +54,7 @@ type Analysis = {
   missingKeywords: string[];
   strengths: string[];
   improvements: string[];
-  sections: { label: string; present: boolean }[];
+  sections: { label: string; score: number }[];
 };
 
 function tokenize(text: string) {
@@ -77,9 +79,14 @@ function extractKeywords(jobDescription: string) {
     .map(([word]) => word);
 }
 
-function includesAny(text: string, terms: string[]) {
+// Scores a section 0-100 from how many of its trigger terms show up in the
+// resume, so the local (non-AI) fallback can still show a progress bar
+// instead of a flat yes/no.
+function sectionScore(text: string, terms: string[]): number {
   const lower = text.toLowerCase();
-  return terms.some((term) => lower.includes(term));
+  const hits = terms.filter((term) => lower.includes(term)).length;
+  if (hits === 0) return 20;
+  return Math.min(100, Math.round(35 + (hits / terms.length) * 65));
 }
 
 function analyzeResume(resume: string, jobDescription: string): Analysis {
@@ -90,24 +97,26 @@ function analyzeResume(resume: string, jobDescription: string): Analysis {
   const matchRatio = keywords.length ? matchedKeywords.length / keywords.length : 0;
 
   const sections = [
-    { label: "Education", present: includesAny(resume, ["education", "university", "college"]) },
-    { label: "Projects", present: includesAny(resume, ["project", "portfolio", "built", "designed"]) },
-    { label: "Skills", present: includesAny(resume, ["skills", "tools", "technologies"]) },
-    { label: "Experience", present: includesAny(resume, ["experience", "intern", "work", "volunteer"]) },
-    { label: "Impact", present: includesAny(resume, ["improved", "increased", "reduced", "%", "users"]) },
+    { label: "Education", score: sectionScore(resume, ["education", "university", "college"]) },
+    { label: "Projects", score: sectionScore(resume, ["project", "portfolio", "built", "designed"]) },
+    { label: "Skills", score: sectionScore(resume, ["skills", "tools", "technologies"]) },
+    { label: "Experience", score: sectionScore(resume, ["experience", "intern", "work", "volunteer"]) },
+    { label: "Impact", score: sectionScore(resume, ["improved", "increased", "reduced", "%", "users"]) },
   ];
 
-  const sectionScore = sections.filter((section) => section.present).length / sections.length;
-  const score = Math.round(matchRatio * 72 + sectionScore * 28);
+  const avgSectionScore = sections.reduce((sum, section) => sum + section.score, 0) / sections.length / 100;
+  const score = Math.round(matchRatio * 72 + avgSectionScore * 28);
+
+  const findSection = (label: string) => sections.find((section) => section.label === label)?.score ?? 0;
 
   const strengths = [
     matchedKeywords.length > 0
       ? `The resume already matches ${matchedKeywords.length} important role keyword${matchedKeywords.length === 1 ? "" : "s"}.`
       : "The resume has a foundation, but it needs more language from the target role.",
-    sections.find((section) => section.label === "Projects")?.present
+    findSection("Projects") >= 60
       ? "Project work is visible, which helps students with limited formal experience show proof of ability."
       : "Adding project work would make the resume stronger for student-level roles.",
-    sections.find((section) => section.label === "Skills")?.present
+    findSection("Skills") >= 60
       ? "The skills section helps recruiters quickly understand the student's toolset."
       : "A dedicated skills section would make the resume easier to scan.",
   ];
@@ -116,10 +125,10 @@ function analyzeResume(resume: string, jobDescription: string): Analysis {
     missingKeywords.length > 0
       ? `Add truthful examples using missing keywords such as ${missingKeywords.slice(0, 5).join(", ")}.`
       : "Keyword coverage is strong. Focus next on clearer outcomes and stronger bullets.",
-    sections.find((section) => section.label === "Impact")?.present
+    findSection("Impact") >= 60
       ? "Keep impact language visible and connect each result to a project or work activity."
       : "Add measurable outcomes where possible, such as users supported, reports built, time saved, or errors reduced.",
-    sections.find((section) => section.label === "Experience")?.present
+    findSection("Experience") >= 60
       ? "Make sure experience bullets begin with action verbs and connect directly to the job description."
       : "If formal work experience is limited, add class projects, volunteer work, or campus leadership as experience.",
   ];
@@ -167,6 +176,12 @@ function extractSkillsSection(resumeText: string): string {
 
 // Stable reference for the initial (empty) analysis so session snapshots match.
 const EMPTY_ANALYSIS: Analysis = analyzeResume("", "");
+
+function bandColor(score: number): string {
+  if (score >= 70) return "#16a34a";
+  if (score >= 40) return "#d97706";
+  return "#dc2626";
+}
 
 export function ResumeCheckerClient() {
   const [resume, setResume] = useSessionState("resume:text", "");
@@ -393,6 +408,47 @@ export function ResumeCheckerClient() {
               </div>
             ) : null}
 
+            <div className="stat-cards">
+              <div className="stat-card">
+                <span style={{ color: "#166534" }}>{currentAnalysis.matchedKeywords.length}</span>
+                <p>Matched keywords</p>
+              </div>
+              <div className="stat-card">
+                <span style={{ color: "var(--brand-blue)" }}>{currentAnalysis.missingKeywords.length}</span>
+                <p>Missing keywords</p>
+              </div>
+              <div className="stat-card">
+                <span style={{ color: "var(--deep-navy)" }}>
+                  {currentAnalysis.sections.filter((section) => section.score >= 70).length}/
+                  {currentAnalysis.sections.length}
+                </span>
+                <p>Sections strong</p>
+              </div>
+            </div>
+
+            <section className="result-block">
+              <h2>Resume sections</h2>
+              <div className="section-overview">
+                <SectionRadarChart sections={currentAnalysis.sections} />
+                <div className="section-score-grid">
+                  {currentAnalysis.sections.map((section) => (
+                    <div className="section-score-card" key={section.label}>
+                      <div className="section-score-card-top">
+                        <p>{section.label}</p>
+                        <span style={{ color: bandColor(section.score) }}>{section.score}%</span>
+                      </div>
+                      <div className="section-score-bar">
+                        <div
+                          className="section-score-bar-fill"
+                          style={{ width: `${section.score}%`, background: bandColor(section.score) }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
             <section className="result-block">
               <h2>Matched keywords</h2>
               <div className="keyword-list">
@@ -415,35 +471,25 @@ export function ResumeCheckerClient() {
               </div>
             </section>
 
-            <section className="result-block">
-              <h2>Resume sections</h2>
-              <div className="section-checks">
-                {currentAnalysis.sections.map((section) => (
-                  <div className="section-check" key={section.label}>
-                    <span>{section.present ? "Ready" : "Add"}</span>
-                    <p>{section.label}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
+            <div className="result-columns">
+              <section className="result-block">
+                <h2>Strengths</h2>
+                <ul>
+                  {currentAnalysis.strengths.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
 
-            <section className="result-block">
-              <h2>Strengths</h2>
-              <ul>
-                {currentAnalysis.strengths.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-
-            <section className="result-block">
-              <h2>Recommended improvements</h2>
-              <ul>
-                {currentAnalysis.improvements.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
+              <section className="result-block">
+                <h2>Recommended improvements</h2>
+                <ul>
+                  {currentAnalysis.improvements.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            </div>
 
             {hasAnalyzed ? (
               <section className="result-block continue-block">
@@ -466,6 +512,12 @@ export function ResumeCheckerClient() {
                     Build a skill roadmap
                   </Link>
                 </div>
+              </section>
+            ) : null}
+
+            {hasAnalyzed ? (
+              <section className="result-block">
+                <JourneyBoard context="embed" />
               </section>
             ) : null}
           </div>

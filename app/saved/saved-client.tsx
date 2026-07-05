@@ -7,7 +7,7 @@ type ResumeData = {
   score: number;
   matchedKeywords: string[];
   missingKeywords: string[];
-  sections: { label: string; present: boolean }[];
+  sections: { label: string; score: number }[];
   strengths: string[];
   improvements: string[];
 };

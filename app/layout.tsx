@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: "Pathway AI | A One Stop Shop to Your Career Goals",
+  title: "Pathway AI | Reach career-ready in 4 steps",
   description:
     "Pathway AI helps students improve resumes, discover career paths, build skill roadmaps, and practice interviews in one connected career readiness platform.",
   metadataBase: new URL("https://pathway-aiapp.vercel.app"),
   openGraph: {
-    title: "Pathway AI | A One Stop Shop to Your Career Goals",
+    title: "Pathway AI | Reach career-ready in 4 steps",
     description:
       "Pathway AI helps students improve resumes, discover career paths, build skill roadmaps, and practice interviews in one connected career readiness platform.",
     url: "https://pathway-aiapp.vercel.app",

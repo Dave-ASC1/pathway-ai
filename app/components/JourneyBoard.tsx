@@ -372,13 +372,18 @@ export function JourneyBoard({ context = "landing" }: { context?: "landing" | "w
       ? allDone
         ? "All 4 steps done."
         : `${completedCount} of 4 steps done.`
-      : "Reach career-ready in 4 steps.";
+      : "From confused to career-ready in 4 steps.";
 
   return (
     <div className="journey-board">
       <div className="journey-board-heading">
         <p className="journey-board-kicker">{kicker}</p>
         <h1>{heading}</h1>
+        {context === "landing" ? (
+          <p className="journey-board-sub">
+            Resume checks, career paths, skill roadmaps, and interview practice, all in one free tool.
+          </p>
+        ) : null}
       </div>
 
       <div className="journey-canvas journey-canvas-wide">

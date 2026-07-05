@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Pathway AI: reach career-ready in 4 steps";
+export const alt = "Pathway AI: from confused to career-ready in 4 steps";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -40,14 +40,14 @@ export default function OpengraphImage() {
         <div
           style={{
             display: "flex",
-            fontSize: "76px",
+            fontSize: "62px",
             fontWeight: 800,
-            lineHeight: 1.05,
-            letterSpacing: "-3px",
+            lineHeight: 1.08,
+            letterSpacing: "-2.5px",
             maxWidth: "940px",
           }}
         >
-          Reach career-ready in 4 steps.
+          From confused to career-ready in 4 steps.
         </div>
         <div
           style={{

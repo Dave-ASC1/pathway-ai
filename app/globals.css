@@ -402,11 +402,12 @@ a {
 }
 
 .board-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   width: min(760px, calc(100% - 2rem));
   margin: 0 auto;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .board-header {
@@ -420,8 +421,8 @@ a {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  margin-top: auto;
-  padding: 2.5rem 0;
+  margin-top: 2.5rem;
+  padding: 2rem 0;
   color: var(--muted);
 }
 
@@ -457,6 +458,13 @@ a {
   font-weight: 760;
   letter-spacing: -0.04em;
   line-height: 1.05;
+}
+
+.journey-board-sub {
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 34rem;
 }
 
 .journey-canvas {

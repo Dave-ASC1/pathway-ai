@@ -9,21 +9,61 @@ import { SectionRadarChart } from "../components/SectionRadarChart";
 import { saveItem } from "@/lib/history";
 import { readSession, useSessionState, writeSession } from "@/lib/session";
 
-const sampleResume = `David Ademoye
-Information Sciences and Technology student
+const sampleResume = `Jordan Miles
+IT Operations Analyst
+
+Summary
+IT Operations Analyst who can monitor and manage servers, network infrastructure, incidents, and tickets in a fast paced support environment.
 
 Education
-Penn State University, B.S. Information Sciences and Technology
+Pennsylvania State University, B.S. Information Sciences and Technology
+Relevant coursework: network administration, systems support, and IT service management
+
+Experience
+IT Operations Analyst Intern, Keystone Health Systems, State College, PA (May 2024 to present)
+Supported daily IT operations for a 400 person company, keeping systems and services online.
+Monitored servers and responded within minutes when servers reported a problem, which reduced downtime.
+Monitored network infrastructure and kept the network stable across three office locations.
+Managed incidents from open to close using a ticketing system, opening and closing over 40 tickets a week.
+Logged every incident and closed tickets within same day service targets, which improved response time by 30%.
+Resolved hardware problems and resolved software problems for 200 plus users, increasing first call resolution.
+Wrote clear documentation for new systems so documentation stayed current for the whole support team.
+Configured Windows Server and supported Windows desktops across every department.
+Managed Active Directory accounts and maintained Active Directory groups for onboarding and offboarding.
+Supported Azure subscriptions and reviewed Azure billing monthly to control cloud costs.
+Ran backups on a schedule and verified backups regularly, achieving a 100 percent recovery success rate.
+Built automation scripts that reduced manual work and increased team output.
+Monitored security alerts and reviewed security logs weekly to protect company data.
+Prepared compliance reports and tracked compliance deadlines for every audit with zero missed findings.
+Followed change management steps and documented every change carefully before deployment.
+
+Volunteer Experience
+Volunteer IT Support, Local Community Center
+Supported the helpdesk queue on weekends and trained new helpdesk volunteers on ticketing tools.
 
 Projects
-Pathway AI: Designed a student career readiness platform using Next.js, TypeScript, and responsive UI patterns.
-Inventory Dashboard: Built a dashboard that summarized operational data and presented action items for managers.
+Home Lab Automation: Built and designed a home lab environment to practice Windows Server, Active Directory, and Azure administration.
+Helpdesk Portfolio Project: Designed a small ticketing portfolio site to track tickets and incidents for a mock support team.
 
 Skills
-JavaScript, TypeScript, React, Next.js, data analysis, SQL, communication, teamwork`;
+Windows Server, Active Directory, Azure, networking, ticketing systems, automation scripting, security monitoring, compliance reporting, backups, documentation, tools: PowerShell, Intune, ServiceNow, and other IT operations technologies`;
 
-const sampleJobDescription = `Entry-Level Technical Analyst
-We are looking for a candidate who can analyze business requirements, document workflows, communicate with stakeholders, support dashboards, use SQL, troubleshoot technical issues, and collaborate with cross-functional teams. Experience with data analysis, reporting, documentation, and problem solving is preferred.`;
+const sampleJobDescription = `IT Operations Analyst
+
+We are hiring an IT Operations Analyst for our growing operations team. This analyst keeps daily technology operations running smoothly for the whole company.
+
+Responsibilities:
+Monitor servers and respond when servers report a problem. Monitor network infrastructure so the network stays stable. Manage incidents from open to close and log incidents in the tracker. Open tickets for new incidents and close tickets once resolved.
+
+Troubleshoot hardware problems and troubleshoot software problems for staff. Write clear documentation for new systems so documentation stays current.
+
+Configure Windows Server and support Windows desktops. Manage Active Directory accounts and maintain Active Directory groups. Support Azure subscriptions and review Azure billing.
+
+Run backups on a schedule and verify backups regularly. Build automation scripts and expand automation to save time.
+
+Monitor security alerts and review security logs. Prepare compliance reports and track compliance deadlines.
+
+Support the helpdesk queue and train new helpdesk staff. Follow change management steps and document every change carefully.`;
 
 const stopWords = new Set([
   "about",

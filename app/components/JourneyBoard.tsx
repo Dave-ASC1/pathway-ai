@@ -80,9 +80,10 @@ type BoardProps = {
   nextId: StopId | null;
   startHref: string;
   interactive?: boolean;
+  startStopId?: StopId | null;
 };
 
-function Board({ layout, doneMap, nextId, startHref, interactive = false }: BoardProps) {
+function Board({ layout, doneMap, nextId, startHref, interactive = false, startStopId = null }: BoardProps) {
   const { r } = layout;
   const pathRef = useRef<SVGPathElement>(null);
   const carRef = useRef<SVGGElement>(null);
@@ -143,15 +144,16 @@ function Board({ layout, doneMap, nextId, startHref, interactive = false }: Boar
     }
 
     const total = path.getTotalLength();
-    const stops = stopLenRef.current;
+    const startLen = startStopId ? (stopLenRef.current.find((s) => s.id === startStopId)?.len ?? 0) : 0;
+    const stops = stopLenRef.current.filter((s) => s.len > startLen);
     const speed = total / CAR_TRAVEL_MS;
 
-    let head = 0;
+    let head = startLen;
     let stopIdx = 0;
     let pausedUntil = 0;
     let last = performance.now();
 
-    placeCar(path, 0, total);
+    placeCar(path, startLen, total);
     setTouring(true);
 
     const step = (now: number) => {
@@ -240,7 +242,12 @@ function Board({ layout, doneMap, nextId, startHref, interactive = false }: Boar
       <path className="jb-road-dash" d={layout.path} />
 
       {interactive ? (
-        <g ref={carRef} className={`jb-car${touring ? " on" : ""}`} aria-hidden="true" transform={`translate(${layout.start.x},${layout.start.y})`}>
+        <g
+          ref={carRef}
+          className={`jb-car${touring ? " on" : ""}`}
+          aria-hidden="true"
+          transform={`translate(${startStopId ? layout.nodes[startStopId][0] : layout.start.x},${startStopId ? layout.nodes[startStopId][1] : layout.start.y})`}
+        >
           <rect x="-9" y="-12" width="9" height="5" rx="2" fill="#0b1220" />
           <rect x="4.5" y="-12" width="9" height="5" rx="2" fill="#0b1220" />
           <rect x="-9" y="7" width="9" height="5" rx="2" fill="#0b1220" />
@@ -252,22 +259,24 @@ function Board({ layout, doneMap, nextId, startHref, interactive = false }: Boar
         </g>
       ) : null}
 
-      <a
-        href={startHref}
-        className={`jb-start${touring ? " touring" : ""}`}
-        aria-label="Start your journey"
-        onMouseEnter={startTour}
-        onMouseLeave={endTour}
-        onFocus={startTour}
-        onBlur={endTour}
-      >
-        <rect className="jb-start-pill" x={layout.start.x - 78} y={layout.start.y - 24} width="156" height="48" rx="24" />
-        <text className="jb-start-text" x={layout.start.x} y={layout.start.y + 6} textAnchor="middle" fontSize="16.5">
-          {"Start here →"}
-        </text>
-      </a>
+      {startStopId ? null : (
+        <a
+          href={startHref}
+          className={`jb-start${touring ? " touring" : ""}`}
+          aria-label="Start your journey"
+          onMouseEnter={startTour}
+          onMouseLeave={endTour}
+          onFocus={startTour}
+          onBlur={endTour}
+        >
+          <rect className="jb-start-pill" x={layout.start.x - 78} y={layout.start.y - 24} width="156" height="48" rx="24" />
+          <text className="jb-start-text" x={layout.start.x} y={layout.start.y + 6} textAnchor="middle" fontSize="16.5">
+            {"Start here →"}
+          </text>
+        </a>
+      )}
 
-      {interactive ? (
+      {interactive && !startStopId ? (
         <text
           className={`jb-hint${touring ? " on" : ""}`}
           x={layout.start.x}
@@ -349,7 +358,15 @@ function Board({ layout, doneMap, nextId, startHref, interactive = false }: Boar
 
 type Context = "landing" | "workspace" | "embed";
 
-export function JourneyBoard({ context = "landing" }: { context?: Context }) {
+export function JourneyBoard({
+  context = "landing",
+  currentStop,
+}: {
+  context?: Context;
+  /** For context="embed": the stop just completed. The car continues its
+   * tour from here instead of replaying the whole path from the start. */
+  currentStop?: StopId;
+}) {
   const [resumeDone] = useSessionState("resume:hasAnalyzed", false);
   const [careerResult] = useSessionState<unknown>("career:result", null);
   const [roadmapResult] = useSessionState<unknown>("roadmap:result", null);
@@ -390,7 +407,14 @@ export function JourneyBoard({ context = "landing" }: { context?: Context }) {
       </div>
 
       <div className="journey-canvas journey-canvas-wide">
-        <Board layout={WIDE} doneMap={doneMap} nextId={nextId} startHref={startHref} interactive />
+        <Board
+          layout={WIDE}
+          doneMap={doneMap}
+          nextId={nextId}
+          startHref={startHref}
+          interactive
+          startStopId={context === "embed" ? (currentStop ?? null) : null}
+        />
       </div>
       <div className="journey-canvas journey-canvas-tall">
         <Board layout={TALL} doneMap={doneMap} nextId={nextId} startHref={startHref} />

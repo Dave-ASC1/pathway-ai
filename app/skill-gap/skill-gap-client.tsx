@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
 import { readSession, useSessionState, writeSession } from "@/lib/session";
@@ -186,6 +187,12 @@ export function SkillGapClient() {
           </div>
         )}
       </section>
+
+      {roadmap ? (
+        <section className="result-block">
+          <JourneyBoard context="embed" currentStop="roadmap" />
+        </section>
+      ) : null}
     </div>
   );
 }

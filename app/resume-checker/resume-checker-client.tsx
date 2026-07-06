@@ -13,18 +13,18 @@ const sampleResume = `Jordan Miles
 IT Operations Analyst
 
 Summary
-IT Operations Analyst who can monitor and manage servers, network infrastructure, incidents, and tickets in a fast paced support environment.
+Reliable IT Operations Analyst with hands-on experience keeping servers, network infrastructure, incidents, and tickets running smoothly in a fast paced support environment.
 
 Education
 Pennsylvania State University, B.S. Information Sciences and Technology
 Relevant coursework: network administration, systems support, and IT service management
 
 Experience
-IT Operations Analyst Intern, Keystone Health Systems, State College, PA (May 2024 to present)
+IT Operations Analyst Intern, Keystone Health Systems, University Park, PA (May 2024 to present)
 Supported daily IT operations for a 400 person company, keeping systems and services online.
 Monitored servers and responded within minutes when servers reported a problem, which reduced downtime.
 Monitored network infrastructure and kept the network stable across three office locations.
-Managed incidents from open to close using a ticketing system, opening and closing over 40 tickets a week.
+Took ownership of incidents from first report to close, tracking each ticket in the system and resolving more than 40 tickets a week.
 Logged every incident and closed tickets within same day service targets, which improved response time by 30%.
 Resolved hardware problems and resolved software problems for 200 plus users, increasing first call resolution.
 Wrote clear documentation for new systems so documentation stayed current for the whole support team.
@@ -557,7 +557,7 @@ export function ResumeCheckerClient() {
 
             {hasAnalyzed ? (
               <section className="result-block">
-                <JourneyBoard context="embed" />
+                <JourneyBoard context="embed" currentStop="resume" />
               </section>
             ) : null}
           </div>

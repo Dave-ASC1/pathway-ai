@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
 import { useSessionState } from "@/lib/session";
@@ -252,6 +253,10 @@ export function InterviewClient() {
                 Practice another role
               </button>
             </div>
+
+            <section className="result-block">
+              <JourneyBoard context="embed" currentStop="interview" />
+            </section>
           </div>
         )}
       </section>

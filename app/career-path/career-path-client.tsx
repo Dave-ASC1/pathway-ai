@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
 import { useSessionState, writeSession } from "@/lib/session";
@@ -208,6 +209,12 @@ export function CareerPathClient() {
           </div>
         )}
       </section>
+
+      {paths ? (
+        <section className="result-block">
+          <JourneyBoard context="embed" currentStop="career" />
+        </section>
+      ) : null}
     </div>
   );
 }

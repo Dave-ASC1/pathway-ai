@@ -232,6 +232,7 @@ export function ResumeCheckerClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [uploadedName, setUploadedName] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -267,18 +268,26 @@ export function ResumeCheckerClient() {
     async (r: string = resume, jd: string = jobDescription) => {
       setIsLoading(true);
       setSaved(false);
+      setAnalysisError(null);
       try {
         const res = await fetch("/api/analyze-resume", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ resume: r, jobDescription: jd }),
         });
-        if (!res.ok) throw new Error("API error");
-        const data = await res.json();
-        setAnalysis(data);
-        setAnalysisSource(data.source ?? "local");
-        setHasAnalyzed(true);
+        const data = await res.json().catch(() => null);
+        if (!res.ok) {
+          // A real response from our own API (input too long, rate limited,
+          // etc.) — show it instead of silently substituting local results.
+          setAnalysisError(data?.error ?? "Something went wrong. Please try again.");
+        } else {
+          setAnalysis(data);
+          setAnalysisSource(data.source ?? "local");
+          setHasAnalyzed(true);
+        }
       } catch {
+        // The API itself was unreachable (network/server down) — degrade to
+        // the local analyzer so the tool still works rather than dead-ending.
         const fallback = analyzeResume(r, jd);
         setAnalysis(fallback);
         setAnalysisSource("local");
@@ -424,6 +433,11 @@ export function ResumeCheckerClient() {
             <PathwayLoader />
             <h2>Analyzing your resume…</h2>
             <p>Pathway AI is reviewing your resume against the job description.</p>
+          </div>
+        ) : analysisError ? (
+          <div className="empty-state">
+            <h2>We hit a snag.</h2>
+            <p>{analysisError}</p>
           </div>
         ) : !canAnalyze ? (
           <div className="empty-state">

@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
 
   const body = await req.json().catch(() => null);
-  const role: string = body?.role ?? "";
+  const role: string = typeof body?.role === "string" ? body.role : "";
 
   if (!role.trim()) {
     return NextResponse.json(

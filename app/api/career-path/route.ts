@@ -83,10 +83,10 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
 
   const body = await req.json().catch(() => null);
-  const major: string = body?.major ?? "";
-  const year: string = body?.year ?? "";
-  const interests: string = body?.interests ?? "";
-  const targetIndustries: string = body?.targetIndustries ?? "";
+  const major: string = typeof body?.major === "string" ? body.major : "";
+  const year: string = typeof body?.year === "string" ? body.year : "";
+  const interests: string = typeof body?.interests === "string" ? body.interests : "";
+  const targetIndustries: string = typeof body?.targetIndustries === "string" ? body.targetIndustries : "";
 
   if (!major.trim() || !interests.trim()) {
     return NextResponse.json(

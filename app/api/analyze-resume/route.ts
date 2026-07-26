@@ -172,8 +172,8 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
 
   const body = await req.json().catch(() => null);
-  const resume: string = body?.resume ?? "";
-  const jobDescription: string = body?.jobDescription ?? "";
+  const resume: string = typeof body?.resume === "string" ? body.resume : "";
+  const jobDescription: string = typeof body?.jobDescription === "string" ? body.jobDescription : "";
 
   if (!resume.trim() || !jobDescription.trim()) {
     return NextResponse.json({ error: "resume and jobDescription are required" }, { status: 400 });

@@ -101,8 +101,8 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
 
   const body = await req.json().catch(() => null);
-  const currentSkills: string = body?.currentSkills ?? "";
-  const targetRole: string = body?.targetRole ?? "";
+  const currentSkills: string = typeof body?.currentSkills === "string" ? body.currentSkills : "";
+  const targetRole: string = typeof body?.targetRole === "string" ? body.targetRole : "";
 
   if (!currentSkills.trim() || !targetRole.trim()) {
     return NextResponse.json(

@@ -83,13 +83,13 @@ export async function POST(req: NextRequest) {
   if (limited) return limited;
 
   const body = await req.json().catch(() => null);
-  const role: string = body?.role ?? "";
+  const role: string = typeof body?.role === "string" ? body.role : "";
   const rawAnswers: AnswerInput[] = Array.isArray(body?.answers) ? body.answers : [];
 
   // Only evaluate questions the candidate actually answered
-  const answers = rawAnswers.filter(
-    (a) => a && typeof a.answer === "string" && a.answer.trim().length > 0,
-  );
+  const answers = rawAnswers
+    .filter((a) => a && typeof a.answer === "string" && a.answer.trim().length > 0)
+    .map((a) => ({ question: typeof a.question === "string" ? a.question : "", answer: a.answer }));
 
   if (!role.trim() || answers.length === 0) {
     return NextResponse.json(

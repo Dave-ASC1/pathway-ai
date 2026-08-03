@@ -77,11 +77,16 @@ export function extractKeywords(jobDescription: string) {
 // Scores a section 0-100 from how many of its trigger terms show up in the
 // resume, so the local (non-AI) fallback can still show a progress bar
 // instead of a flat yes/no.
+//
+// Matching even one term means the section is present, so the floor for a hit
+// sits above the 60 the advice copy treats as adequate. The old floor of 35
+// meant a resume with a plain "Skills:" heading scored 57 and got told to add a
+// skills section it already had.
 export function sectionScore(text: string, terms: string[]): number {
   const lower = text.toLowerCase();
   const hits = terms.filter((term) => lower.includes(term)).length;
   if (hits === 0) return 20;
-  return Math.min(100, Math.round(35 + (hits / terms.length) * 65));
+  return Math.min(100, Math.round(62 + (hits / terms.length) * 38));
 }
 
 export function analyzeResume(resume: string, jobDescription: string): Analysis {

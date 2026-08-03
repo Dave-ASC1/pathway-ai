@@ -802,6 +802,13 @@ a {
   color: #b91c1c;
 }
 
+/* Says why the submit button is disabled, so an empty form does not read as broken. */
+.form-hint {
+  margin: 0.85rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
 /* Confirms which sample profile the "Try an example" button just loaded. */
 .example-status {
   margin: 0.85rem 0 0;

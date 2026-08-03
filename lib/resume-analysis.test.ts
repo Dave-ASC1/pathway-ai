@@ -96,6 +96,26 @@ describe("analyzeResume", () => {
     }
   });
 
+  it("does not tell a resume with a skills section to add one", () => {
+    const resume = `MARIA SANTOS
+Penn State, B.S. Biology, expected 2028.
+Lab Assistant, campus research lab. Logged sample data in Excel.
+Skills: Excel, data entry, lab safety, microscopy, teamwork.`;
+
+    const result = analyzeResume(resume, "Research coordinator handling study data.");
+    const skills = result.sections.find((s) => s.label === "Skills")!.score;
+
+    // The advice copy treats 60 as adequate, so a present section must clear it.
+    expect(skills).toBeGreaterThanOrEqual(60);
+    expect(result.improvements.join(" ")).not.toMatch(/dedicated skills section/i);
+    expect(result.strengths.join(" ")).not.toMatch(/would make the resume easier to scan/i);
+  });
+
+  it("still marks a missing section as weak", () => {
+    const result = analyzeResume("Just a name and a phone number.", "Some role.");
+    expect(result.sections.find((s) => s.label === "Skills")!.score).toBeLessThan(40);
+  });
+
   it("handles empty input without throwing", () => {
     const result = analyzeResume("", "");
     expect(result.score).toBeGreaterThanOrEqual(0);

@@ -161,6 +161,11 @@ export function CareerPathClient() {
           {example ? (
             <p className="example-status">Loaded {example.label}. Press explore to see the paths.</p>
           ) : null}
+          {!canSubmit && !isLoading ? (
+            <p className="form-hint">
+              Add your major and a sentence about your interests, or press Try an example.
+            </p>
+          ) : null}
         </form>
       </section>
 

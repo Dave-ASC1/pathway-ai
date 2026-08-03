@@ -128,6 +128,11 @@ export function SkillGapClient() {
           {example ? (
             <p className="example-status">Loaded {example.label}. Press build to see the roadmap.</p>
           ) : null}
+          {!canSubmit && !isLoading ? (
+            <p className="form-hint">
+              Add a few of your current skills and a target role, or press Try an example.
+            </p>
+          ) : null}
         </form>
       </section>
 

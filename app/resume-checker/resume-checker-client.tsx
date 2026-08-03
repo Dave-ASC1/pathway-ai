@@ -253,6 +253,11 @@ export function ResumeCheckerClient() {
             </button>
           </div>
           {example ? <p className="example-status">Loaded {example.label}.</p> : null}
+          {!canAnalyze && !isLoading ? (
+            <p className="form-hint">
+              Paste at least a few lines into both boxes to analyze, or press Try an example.
+            </p>
+          ) : null}
         </form>
       </section>
 

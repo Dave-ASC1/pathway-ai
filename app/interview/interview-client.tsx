@@ -207,6 +207,11 @@ export function InterviewClient() {
                 Try an example
               </button>
             </div>
+            {!canGenerate && !isLoading ? (
+              <p className="form-hint">
+                Enter a role, or paste a full job description, to generate questions.
+              </p>
+            ) : null}
           </form>
         </section>
       ) : (

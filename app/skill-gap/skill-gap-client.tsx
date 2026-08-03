@@ -90,7 +90,10 @@ export function SkillGapClient() {
             Your current skills
             <textarea
               value={currentSkills}
-              onChange={(e) => setCurrentSkills(e.target.value)}
+              onChange={(e) => {
+                setCurrentSkills(e.target.value);
+                setExample(null);
+              }}
               rows={5}
               placeholder="e.g. HTML, CSS, basic JavaScript, Excel, writing, teamwork. Built a couple of small class projects."
             />
@@ -101,7 +104,10 @@ export function SkillGapClient() {
             <input
               type="text"
               value={targetRole}
-              onChange={(e) => setTargetRole(e.target.value)}
+              onChange={(e) => {
+                setTargetRole(e.target.value);
+                setExample(null);
+              }}
               placeholder="e.g. Front-End Developer, Data Analyst, Product Manager"
             />
           </label>

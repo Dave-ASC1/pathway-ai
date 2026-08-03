@@ -94,14 +94,23 @@ export function CareerPathClient() {
             <input
               type="text"
               value={major}
-              onChange={(e) => setMajor(e.target.value)}
+              onChange={(e) => {
+                setMajor(e.target.value);
+                setExample(null);
+              }}
               placeholder="e.g. Information Sciences and Technology"
             />
           </label>
 
           <label>
             Year
-            <select value={year} onChange={(e) => setYear(e.target.value)}>
+            <select
+              value={year}
+              onChange={(e) => {
+                setYear(e.target.value);
+                setExample(null);
+              }}
+            >
               {yearOptions.map((option) => (
                 <option key={option} value={option}>
                   {option}
@@ -114,7 +123,10 @@ export function CareerPathClient() {
             Interests, strengths, and what you enjoy
             <textarea
               value={interests}
-              onChange={(e) => setInterests(e.target.value)}
+              onChange={(e) => {
+                setInterests(e.target.value);
+                setExample(null);
+              }}
               rows={4}
               placeholder="e.g. I like solving problems with data, building things, and working with people. I'm strong at writing and organizing."
             />
@@ -125,7 +137,10 @@ export function CareerPathClient() {
             <input
               type="text"
               value={targetIndustries}
-              onChange={(e) => setTargetIndustries(e.target.value)}
+              onChange={(e) => {
+                setTargetIndustries(e.target.value);
+                setExample(null);
+              }}
               placeholder="e.g. healthcare, finance, tech (or leave blank)"
             />
           </label>

@@ -95,6 +95,7 @@ export function ResumeCheckerClient() {
       setResume(data.text);
       setUploadedName(file.name);
       setHasAnalyzed(false);
+      setExample(null);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Could not read that file.");
       setUploadedName(null);
@@ -212,6 +213,8 @@ export function ResumeCheckerClient() {
                 setResume(event.target.value);
                 setHasAnalyzed(false);
                 setUploadedName(null);
+                // Their own text now, so stop claiming a sample profile is loaded.
+                setExample(null);
               }}
               rows={13}
               placeholder="Paste your resume here, or upload a file above."
@@ -229,6 +232,7 @@ export function ResumeCheckerClient() {
               onChange={(event) => {
                 setJobDescription(event.target.value);
                 setHasAnalyzed(false);
+                setExample(null);
               }}
               rows={11}
               placeholder="Paste the job description here..."

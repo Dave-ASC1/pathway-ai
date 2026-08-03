@@ -36,6 +36,7 @@ export function InterviewClient() {
   const [exampleId, setExampleId] = useSessionState("interview:exampleId", "");
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isFilling, setIsFilling] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -84,17 +85,41 @@ export function InterviewClient() {
     void generateQuestions(next.interview.role);
   }
 
-  // Assigns the loaded person's stories to whatever questions came back, so the
-  // evaluation step is reachable without typing out eight answers by hand.
-  function fillSampleAnswers() {
+  // Drafts answers to the questions that were actually generated, so the
+  // evaluation step is reachable without typing out eight responses by hand.
+  // Falls back to the profile's fixed stories if the draft call fails, which
+  // keeps the button working rather than dead-ending.
+  async function fillSampleAnswers() {
     const source = getExample(exampleId);
     if (!source) return;
-    setAnswers(
-      matchAnswersToQuestions(
-        questions.map((q) => q.question),
-        source.interview.sampleAnswers,
-      ),
-    );
+
+    const questionText = questions.map((q) => q.question);
+    setIsFilling(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/interview/sample-answers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role,
+          questions: questionText,
+          background: source.resumeChecker.resume,
+          strength: source.strength,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !Array.isArray(data.answers) || data.answers.length === 0) {
+        throw new Error("draft failed");
+      }
+      // Backfill from the story bank if the model returned fewer than asked.
+      const drafted: string[] = data.answers;
+      const backup = matchAnswersToQuestions(questionText, source.interview.sampleAnswers);
+      setAnswers(questionText.map((_, i) => drafted[i]?.trim() || backup[i]));
+    } catch {
+      setAnswers(matchAnswersToQuestions(questionText, source.interview.sampleAnswers));
+    } finally {
+      setIsFilling(false);
+    }
   }
 
   async function handleEvaluate() {
@@ -240,14 +265,19 @@ export function InterviewClient() {
               <button
                 className="primary-action"
                 type="button"
-                disabled={answeredCount === 0}
+                disabled={answeredCount === 0 || isFilling}
                 onClick={handleEvaluate}
               >
                 Get feedback ({answeredCount} answered)
               </button>
               {exampleId ? (
-                <button className="secondary-action" type="button" onClick={fillSampleAnswers}>
-                  Fill sample answers
+                <button
+                  className="secondary-action"
+                  type="button"
+                  disabled={isFilling}
+                  onClick={fillSampleAnswers}
+                >
+                  {isFilling ? "Writing answers…" : "Fill sample answers"}
                 </button>
               ) : null}
             </div>

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { examples, getExample, pickExample } from "@/lib/examples";
+import { examples, getExample, matchAnswersToQuestions, pickExample } from "@/lib/examples";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -84,6 +84,59 @@ describe("pickExample", () => {
     vi.spyOn(Math, "random").mockReturnValue(0.999999);
     expect(pickExample()).toBeDefined();
     expect(pickExample(examples[0].id)).toBeDefined();
+  });
+});
+
+describe("matchAnswersToQuestions", () => {
+  const bank = [
+    "I rewrote the recursion handout after noticing students misunderstood the base case.",
+    "I traced the network outage to a DNS misconfiguration and documented the fix.",
+    "My weakness is that I have never worked on a shared codebase professionally.",
+  ];
+
+  it("pairs each question with the story that actually addresses it", () => {
+    const questions = [
+      "Tell me about a weakness you are working on.",
+      "Explain how you would troubleshoot a network problem involving DNS.",
+      "Describe a time you improved how something was taught.",
+    ];
+    const result = matchAnswersToQuestions(questions, bank);
+
+    expect(result[0]).toBe(bank[2]);
+    expect(result[1]).toBe(bank[1]);
+    expect(result[2]).toBe(bank[0]);
+  });
+
+  it("returns one answer per question", () => {
+    expect(matchAnswersToQuestions(["a question about DNS"], bank)).toHaveLength(1);
+    expect(matchAnswersToQuestions(new Array(8).fill("some question"), bank)).toHaveLength(8);
+  });
+
+  it("leaves no question blank when there are more questions than stories", () => {
+    const result = matchAnswersToQuestions(new Array(8).fill("a generic question"), bank);
+    expect(result.every((answer) => answer.trim().length > 0)).toBe(true);
+  });
+
+  it("uses every story once before repeating any", () => {
+    const questions = ["one", "two", "three"];
+    const result = matchAnswersToQuestions(questions, bank);
+    expect(new Set(result).size).toBe(3);
+  });
+
+  it("handles empty input without throwing", () => {
+    expect(matchAnswersToQuestions([], bank)).toEqual([]);
+    expect(matchAnswersToQuestions(["q"], [])).toEqual([]);
+  });
+
+  it("fills every question for each real example's answer bank", () => {
+    for (const ex of examples) {
+      const result = matchAnswersToQuestions(
+        new Array(6).fill("Describe a challenge you faced."),
+        ex.interview.sampleAnswers,
+      );
+      expect(result).toHaveLength(6);
+      expect(result.every((a) => a.trim().length > 0)).toBe(true);
+    }
   });
 });
 

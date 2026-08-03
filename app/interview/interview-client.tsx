@@ -4,7 +4,7 @@ import { useState } from "react";
 import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
-import { getExample, pickExample } from "@/lib/examples";
+import { getExample, matchAnswersToQuestions, pickExample } from "@/lib/examples";
 import { useSessionState } from "@/lib/session";
 
 const EMPTY_QUESTIONS: Question[] = [];
@@ -89,8 +89,12 @@ export function InterviewClient() {
   function fillSampleAnswers() {
     const source = getExample(exampleId);
     if (!source) return;
-    const bank = source.interview.sampleAnswers;
-    setAnswers(questions.map((_, i) => bank[i % bank.length]));
+    setAnswers(
+      matchAnswersToQuestions(
+        questions.map((q) => q.question),
+        source.interview.sampleAnswers,
+      ),
+    );
   }
 
   async function handleEvaluate() {

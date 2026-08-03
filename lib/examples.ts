@@ -381,6 +381,67 @@ export function getExample(id: string): Example | undefined {
 }
 
 /**
+ * Match this person's stories to the questions that actually came back.
+ *
+ * The questions are generated fresh each run, so handing them out in array
+ * order pairs a networking question with a story about documentation and the
+ * coach (correctly) scores it near zero. Picking the closest story per question
+ * is also what a real candidate does when a question lands.
+ *
+ * Scoring is term overlap on words longer than four characters, which is crude
+ * but enough to separate "explain DNS and ping" from "describe a mistake you
+ * made". Assignment is greedy over the best-scoring pairs so one strong match
+ * cannot be stolen by a weaker question, and every story is used once before
+ * any is reused.
+ */
+export function matchAnswersToQuestions(questions: string[], bank: string[]): string[] {
+  if (questions.length === 0 || bank.length === 0) return [];
+
+  const terms = (text: string) =>
+    new Set(
+      text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter((word) => word.length > 4),
+    );
+
+  const questionTerms = questions.map(terms);
+  const answerTerms = bank.map(terms);
+
+  const pairs: { q: number; a: number; score: number }[] = [];
+  questionTerms.forEach((qt, q) => {
+    answerTerms.forEach((at, a) => {
+      let score = 0;
+      qt.forEach((term) => {
+        if (at.has(term)) score++;
+      });
+      pairs.push({ q, a, score });
+    });
+  });
+
+  // Best matches first; ties fall back to original order so output is stable.
+  pairs.sort((x, y) => y.score - x.score || x.q - y.q || x.a - y.a);
+
+  const result: string[] = new Array(questions.length).fill("");
+  const usedAnswers = new Set<number>();
+
+  for (const pair of pairs) {
+    if (result[pair.q] || usedAnswers.has(pair.a)) continue;
+    result[pair.q] = bank[pair.a];
+    usedAnswers.add(pair.a);
+  }
+
+  // More questions than stories: reuse from the top rather than leaving blanks.
+  let cursor = 0;
+  for (let i = 0; i < result.length; i++) {
+    if (!result[i]) result[i] = bank[cursor++ % bank.length];
+  }
+
+  return result;
+}
+
+/**
  * Pick an example at random, skipping `currentId` so clicking the button twice
  * in a row always shows something different.
  */

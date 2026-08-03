@@ -124,7 +124,9 @@ export function InterviewClient() {
 
   async function handleEvaluate() {
     setIsLoading(true);
-    setLoadingLabel("Reviewing your answers…");
+    setLoadingLabel(
+      `Reviewing your ${answeredCount} answer${answeredCount === 1 ? "" : "s"}…`,
+    );
     setError(null);
     try {
       const payload = questions.map((q, i) => ({ question: q.question, answer: answers[i] }));

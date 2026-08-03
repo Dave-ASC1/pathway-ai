@@ -16,23 +16,29 @@ Pathway AI is an IST 440W capstone project at Penn State. It is a student career
 
 ---
 
-## Current State (as of June 30, 2026)
+## Current State (as of August 2, 2026)
+
+Everything below is built, deployed, and verified live. The June planning phases
+that used to fill this file are done; do not treat them as outstanding work.
 
 ### What Works
-- `/` — Landing page with hero, module cards, branding, loading animation
-- `/dashboard` — Student workspace with readiness cards and module links
-- `/resume-checker` — Functional ATS resume checker (client-side, deterministic keyword matching)
-- Build passes: `npm run lint` and `npm run build` both clean
-- Docs exist in `/docs`: implementation document, project management charts, AI prompts log
+- **Live and public:** https://pathway-aiapp.vercel.app (no login prompt)
+- `/` and `/dashboard` — journey board entry pages, progress tracked per step
+- `/resume-checker` — AI analysis with PDF/DOCX upload, score, radar, keywords
+- `/career-path` — three generated paths, each with a first step
+- `/skill-gap` — prioritized roadmap with time estimates
+- `/interview` — generated questions, answer drafting, scored coaching
+- `/saved` — browser-persisted results
+- **Try an example** on all four modules, filling from three student profiles
+- Data handoff between modules (resume skills flow into the roadmap, role into
+  the interview coach)
+- 79 unit tests, `npm run lint`, and `npm run build` all pass
 
-### What Does NOT Work Yet
-- No Claude API integration — the resume checker uses keyword matching, not AI
-- No authentication — Clerk was planned but not installed
-- No database — Prisma + NeonDB were planned but not set up
-- Career Path Explorer: placeholder card only, no page or logic
-- Skill Gap Roadmap: placeholder card only
-- Mock Interview Coach: placeholder card only
-- Vercel deployment: URL redirects to Vercel login (deployment protection is on — needs fixing)
+### Deliberately Not Built
+- **Authentication (Clerk)** and **database (NeonDB + Prisma)** were planned in
+  June and intentionally dropped. The app uses browser storage instead, which
+  keeps it genuinely free and sign-up free. This was a decision, not a gap.
+- Error monitoring (Sentry) needs the user's own account.
 
 ---
 
@@ -47,12 +53,11 @@ ESLint
 npm
 ```
 
-**Planned additions (not yet installed):**
-- `@anthropic-ai/sdk` — Claude API
-- `@clerk/nextjs` — authentication
-- `@prisma/client` + `prisma` — ORM
-- NeonDB — PostgreSQL serverless database
-- `shadcn/ui` — component library (install via `npx shadcn@latest init`)
+**Installed:**
+- `@anthropic-ai/sdk` — powers all five AI routes, model `claude-opus-4-8`
+- `vitest` + `@testing-library/react` + `jsdom` — unit tests
+
+**Not installed, and not planned:** Clerk, Prisma, NeonDB, shadcn/ui.
 
 ---
 
@@ -60,26 +65,31 @@ npm
 
 ```
 app/
-  layout.tsx                        — root layout
-  page.tsx                          — landing page
-  globals.css                       — brand CSS variables and typography
+  layout.tsx, page.tsx, globals.css        — root, landing, brand CSS
+  error.tsx, global-error.tsx, not-found.tsx
   components/
-    AppShell.tsx                    — sidebar nav, shared layout shell
-    PathwayLogo.tsx                 — reusable brand logo component
-  dashboard/
-    page.tsx                        — student dashboard
-  resume-checker/
-    page.tsx                        — server wrapper
-    resume-checker-client.tsx       — all resume checker logic (client component)
-docs/
-  AI_PROMPTS_USED.md
-  IMPLEMENTATION_DOCUMENT.md
-  PROJECT_MANAGEMENT.md             — Gantt, CPA, PERT (May 20–Aug 12)
-  PathwayAI_AI_Prompts_Used.docx
-  PathwayAI_AI_Gen_Implementation_Document.docx
-  PathwayAI_Project_Management_Charts.docx
-public/
-  screenshots/                      — needs to be populated
+    AppShell.tsx        — nav and shared layout shell
+    PathwayLogo.tsx     — brand logo, do not change the dot pattern
+    JourneyBoard.tsx    — the winding path, embedded in every result view
+    PathwayLoader.tsx   — stair/drop loading animation, not a spinner
+    ScoreGauge.tsx, SectionRadarChart.tsx
+  dashboard/ resume-checker/ career-path/ skill-gap/ interview/ saved/
+    page.tsx            — server wrapper
+    *-client.tsx        — all module logic (client component)
+    *-client.test.tsx   — component tests
+  api/
+    analyze-resume/     — has a local fallback
+    career-path/  skill-gap/
+    interview/questions/  interview/evaluate/  interview/sample-answers/
+    parse-resume/       — PDF/DOCX/TXT extraction, not AI
+lib/
+  session.ts            — sessionStorage state and cross-module handoff
+  history.ts            — saved results (localStorage)
+  rate-limit.ts         — per-route in-memory limiter
+  resume-analysis.ts    — deterministic analyzer shared by route and client
+  examples.ts           — the three Try an example student profiles
+docs/                   — capstone deliverables
+report/                 — charts, screenshots, docx generation scripts
 ```
 
 ---
@@ -108,156 +118,38 @@ Loading animation: Dots drop into a stair/path formation. Not a circular spinner
 
 ---
 
-## Immediate Priorities (Do These First)
+## How the App Is Built
 
-### 1. Fix Vercel Deployment
+Read `AGENTS.md` for the full architecture. The essentials:
 
-The URL `https://pathway-ai-ercbvixuf-pathway-ai1.vercel.app/` redirects to Vercel login. Deployment protection is enabled on this preview URL.
-
-Fix options (pick one):
-- In Vercel dashboard → Settings → Deployment Protection → disable for production
-- Or check the Domains tab for the production `.vercel.app` URL and test it in incognito while not logged into Vercel
-- The correct public URL should open the landing page without any login prompt
-
-Once confirmed working, add the public URL to `README.md` and update meta tags in `app/layout.tsx`.
-
-### 2. Take Screenshots
-
-Once Vercel is working, capture and save to `public/screenshots/`:
-- `landing-page.png` — full landing page
-- `dashboard.png` — dashboard with module cards
-- `resume-checker-input.png` — resume checker with text pasted, before analysis
-- `resume-checker-results.png` — resume checker after analysis showing score and feedback
-
-### 3. Commit Docs
-
-These files are untracked and need to be committed:
-```bash
-git add docs/PathwayAI_AI_Prompts_Used.docx
-git add docs/PathwayAI_AI_Gen_Implementation_Document.docx
-git add docs/PathwayAI_Project_Management_Charts.docx
-git add docs/PROJECT_MANAGEMENT.md
-git commit -m "Add project documentation and fix timeline"
-git push
-```
-
-Do NOT commit `docs/~$thwayAI_Project_Management_Charts.docx` — that is a temporary Word lock file.
+- **Five AI routes**, all server-only, under `app/api/`. The key is a Vercel env
+  var read automatically by `new Anthropic()`. Never call the API from a client
+  component.
+- **Never ask one call to produce N results.** The evaluate and sample-answers
+  routes issue one request per item in parallel with `Promise.allSettled`.
+  Batching six evaluations into one response made the model generate them
+  serially and took three to five minutes; fanning out took it to about 15
+  seconds. This applies to any future route returning a list.
+- **The local keyword analyzer** (`lib/resume-analysis.ts`) is the fallback when
+  the AI call fails, imported by both the route and the client. It was
+  previously duplicated in both files; do not re-inline it.
+- **Session continuity** via `lib/session.ts`. Inputs and results survive
+  navigation, and modules hand data to each other by writing the destination's
+  session key.
+- **Example profiles** in `lib/examples.ts` power the Try an example buttons.
+  Three profiles spanning strong, developing, and early students. Keep the weak
+  one; it is the case the coaching is actually for.
 
 ---
 
-## Phase 2 — Claude API Integration
-
-**Goal:** Replace the deterministic keyword matching in the resume checker with real AI analysis via Claude API.
-
-### Setup
+## Testing
 
 ```bash
-npm install @anthropic-ai/sdk
+npm test -- --run
 ```
 
-Add to `.env.local`:
-```
-ANTHROPIC_API_KEY=your_key_here
-```
-
-### Implementation
-
-Create a server-side API route — never call the Claude API from a client component (exposes the key):
-
-```
-app/api/analyze-resume/route.ts
-```
-
-The route should:
-1. Accept POST with `{ resume: string, jobDescription: string }`
-2. Call Claude API with a structured prompt
-3. Return `{ score, matchedKeywords, missingKeywords, sections, strengths, improvements }`
-
-Update `resume-checker-client.tsx` to POST to `/api/analyze-resume` instead of running the local analysis function.
-
-**Prompt design for Claude:**
-Ask Claude to act as a professional ATS resume reviewer. Provide the resume text and job description. Request JSON output containing: overall match score (0-100), top matched keywords, top missing keywords, section completeness check (Education, Experience, Projects, Skills, Impact), 3 strengths, 3 specific improvement recommendations.
-
-**Keep the local fallback:** If the API call fails, fall back to the existing deterministic analyzer so the app never breaks.
-
----
-
-## Phase 3 — Authentication with Clerk
-
-```bash
-npm install @clerk/nextjs
-```
-
-Add to `.env.local`:
-```
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_key
-CLERK_SECRET_KEY=your_key
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
-```
-
-Wrap `app/layout.tsx` with `<ClerkProvider>`. Add `<SignInButton>` / `<UserButton>` to the landing page header. Protect `/dashboard` and inner routes with `auth()` from `@clerk/nextjs/server`.
-
----
-
-## Phase 4 — Database with NeonDB + Prisma
-
-```bash
-npm install @prisma/client prisma
-npx prisma init
-```
-
-Add `DATABASE_URL` from NeonDB to `.env.local`.
-
-Minimal schema for MVP:
-
-```prisma
-model User {
-  id        String           @id @default(cuid())
-  clerkId   String           @unique
-  email     String
-  createdAt DateTime         @default(now())
-  analyses  ResumeAnalysis[]
-}
-
-model ResumeAnalysis {
-  id             String   @id @default(cuid())
-  userId         String
-  user           User     @relation(fields: [userId], references: [id])
-  resumeText     String
-  jobDescription String
-  score          Int
-  feedback       Json
-  createdAt      DateTime @default(now())
-}
-```
-
-Save analysis results after each Claude API call. Surface history on the dashboard.
-
----
-
-## Phase 5 — Remaining Modules
-
-Build each as its own route under `app/`:
-
-### Career Path Explorer (`app/career-path/page.tsx`)
-- Student inputs: major, year, interests, target industries
-- Claude generates: 3 career path options with role titles, typical progression, required skills
-- Show as cards the student can explore
-
-### Skill Gap Roadmap (`app/skill-gap/page.tsx`)
-- Input: student's current skills (from resume or manual entry) + target role
-- Claude generates: gap analysis + prioritized learning roadmap with specific resource types
-- Render as a visual checklist roadmap
-
-### Mock Interview Coach (`app/interview/page.tsx`)
-- Student selects job role or pastes a job description
-- Claude generates: 5-8 role-specific interview questions (behavioral + technical mix)
-- Student types a response to each question
-- Claude evaluates each response: score, strengths, what was missing, model answer
-- Build this last — it is the most complex module
+79 tests, fully offline (the SDK is mocked), about 3 seconds. Route tests live
+beside their routes. Run these alongside lint and build before any commit.
 
 ---
 
@@ -285,12 +177,19 @@ When adding new routes, update `AppShell.tsx` navigation links to include:
 ## Commands
 
 ```bash
-npm run dev       # local dev at localhost:3000
-npm run lint      # must pass before any commit
-npm run build     # must pass before any commit or Vercel deploy
+npm run dev            # local dev at localhost:3000
+npm run lint           # must pass before any commit
+npm test -- --run      # 79 tests, offline, ~3s
+npm run build          # must pass before any commit or Vercel deploy
 ```
 
-Verify both `lint` and `build` pass after every significant change before committing.
+All three of lint, test, and build must pass before committing. Then verify the
+real behavior in the browser, and re-check the live URL after deploying.
+
+Local dev has **no** `ANTHROPIC_API_KEY` (it is set on Vercel for Preview and
+Production only). So locally the resume checker falls back to keyword matching
+and the interview routes return 503. That is expected, not a bug. To run the AI
+locally, `vercel env pull .env.local`.
 
 ---
 
@@ -305,14 +204,15 @@ Verify both `lint` and `build` pass after every significant change before commit
 
 ## Project Timeline
 
-May 20 – August 12, 2026. Today is June 30. Six weeks remain.
+May 20 to August 12, 2026. Today is August 2. Ten days remain.
 
-**Priority order:**
-1. Fix Vercel public URL — this week
-2. Take and commit screenshots — this week
-3. Commit all docs — this week
-4. Claude API for resume checker — weeks 1-2
-5. Clerk auth + NeonDB — week 2-3
-6. Career Path Explorer + Skill Gap Roadmap — weeks 3-4
-7. Mock Interview Coach — week 5
-8. Testing, polish, final docs, submission — final week
+The build is complete. What is left is submission work:
+
+1. Refresh screenshots from the current UI (the journey board and the new
+   results views replaced what is in the older docs)
+2. Update the capstone docs in `docs/` and `report/` to match the shipped app
+3. Record the video reflection (`SELF_REFLECTION.md` has the script notes)
+4. Final submission
+
+Do not start new feature work unless the user asks. The remaining risk is
+documentation drift, not missing functionality.

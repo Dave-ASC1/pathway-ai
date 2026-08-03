@@ -72,12 +72,13 @@ npm run lint    # must pass clean before any commit
 ### 1. API routes, one per AI feature, all server-only
 
 ```
-app/api/analyze-resume/route.ts     (resume checker — has a local fallback!)
+app/api/analyze-resume/route.ts          (resume checker — has a local fallback!)
 app/api/career-path/route.ts
 app/api/skill-gap/route.ts
 app/api/interview/questions/route.ts
-app/api/interview/evaluate/route.ts
-app/api/parse-resume/route.ts       (PDF/DOCX/TXT text extraction, not AI)
+app/api/interview/evaluate/route.ts      (fans out, one request per answer)
+app/api/interview/sample-answers/route.ts (fans out, one request per question)
+app/api/parse-resume/route.ts            (PDF/DOCX/TXT text extraction, not AI)
 ```
 
 Shared pattern in every AI route:
@@ -93,8 +94,21 @@ Shared pattern in every AI route:
   `JSON.parse`.
 - Only `analyze-resume` has a deterministic **local fallback** (keyword matching,
   no AI), this is historical (it was the original MVP logic) and intentionally
-  kept as a safety net if the Claude call fails. The other three routes just
+  kept as a safety net if the Claude call fails. The other routes just
   return a clean error message on failure; they do not have fallbacks.
+  That fallback lives in `lib/resume-analysis.ts` and is imported by **both**
+  the route and `resume-checker-client.tsx`. It used to be copy pasted into
+  both files, which meant fixing it in one place silently left the other
+  behind. Do not re-inline it.
+
+**Never ask one call to produce N results.** `evaluate` and `sample-answers`
+each issue one request per question, in parallel, via `Promise.allSettled`.
+Batching all six into a single response made the model generate them serially:
+evaluation took **three to five minutes**, and fanning out brought it to about
+**15 seconds**. The same trap applies to any future route that returns a list.
+Use `allSettled`, not `all`, so one flaky call costs that item rather than the
+whole batch. There are tests asserting the calls actually overlap (peak
+concurrency), not merely that the right number were made.
 
 ### 2. Session continuity, lib/session.ts
 
@@ -118,7 +132,8 @@ Built on `useSyncExternalStore` (SSR-safe, no hydration mismatch). This means:
   `resume:source`, `career:major`, `career:year`, `career:interests`,
   `career:industries`, `career:result`, `roadmap:currentSkills`,
   `roadmap:targetRole`, `roadmap:result`, `interview:role`, `interview:questions`,
-  `interview:answers`, `interview:evaluations`, `interview:phase`.
+  `interview:answers`, `interview:evaluations`, `interview:phase`,
+  `interview:exampleId`.
 - The dashboard/journey hub (`app/dashboard/dashboard-client.tsx`) reads these
   same keys read-only to compute progress (has the user done each step yet).
 
@@ -127,6 +142,45 @@ for arrays or objects (module-level constants), not new literals per render, or
 `useSyncExternalStore` will warn or loop. See `EMPTY_QUESTIONS` etc. in
 `interview-client.tsx` for the pattern; primitives (`""`, `false`, `null`) are
 fine inline.
+
+### 2b. One click examples, lib/examples.ts
+
+Every module has a **Try an example** button that fills its form from a shared
+set of three student profiles. This exists so anyone evaluating the app (a TA,
+a classmate) can see real output without first inventing a resume and hunting
+down a job posting.
+
+- Each profile carries data for **all four modules**, so a reviewer can start on
+  any page and get coherent results. Adding a module means adding its fields to
+  every profile.
+- `pickExample(currentId)` skips the profile already loaded, so clicking twice
+  always shows something different.
+- The three profiles deliberately span real students: `strong` (senior, real
+  internship, certifications), `developing` (junior, projects but no
+  internship), `early` (sophomore, no relevant experience at all). **Do not
+  replace the weak one with another strong one.** It is the case where the
+  feedback actually matters, and the `early` calibration in `sample-answers`
+  depends on it.
+- The job descriptions are written to match how real postings read: req ID and
+  pay band, distinct responsibility bullets, required vs preferred split,
+  benefits, EEO statement. An earlier version was written backwards from the
+  keyword matcher (repeating every term, resume mirroring it phrase for phrase)
+  which scored well and looked obviously fake. Do not regress to that.
+- Loading an example shows a label naming the profile. Any edit to a field
+  clears it, otherwise the app claims a sample is loaded while showing the
+  user's own text.
+
+### 2c. Local analyzer stop words, lib/resume-analysis.ts
+
+Real postings are mostly boilerplate by volume, so ranking keywords by raw
+frequency surfaces "including", "minimum", "paid", and "hybrid" as the skills a
+student is missing. The `stopWords` set filters hiring boilerplate, benefits,
+and vague descriptors. If keyword output ever looks like junk, extend that set
+rather than changing the ranking.
+
+`sectionScore` floors a matched section above 60 on purpose: the advice copy
+treats 60 as adequate, and the old floor of 35 meant a resume with a plain
+"Skills:" heading scored 57 and got told to add a skills section it already had.
 
 ### 3. Saved results, lib/history.ts (different from session storage)
 
@@ -308,10 +362,32 @@ P0 and most of P1 are done; these remain:
 
 ---
 
+## Tests
+
+Vitest with jsdom and Testing Library. `npm test -- --run`. 79 tests across 11
+files, all offline: `@anthropic-ai/sdk` is mocked with `vi.mock`, so the suite
+runs in about 3 seconds and never spends API credit.
+
+- **Route tests** (`app/api/**/route.test.ts`) mock the SDK and `lib/rate-limit`,
+  then import the route with a dynamic `await import("./route")` so
+  `process.env.ANTHROPIC_API_KEY` can be set per test. Copy an existing one
+  rather than writing the mock boilerplate from scratch.
+- Cover, at minimum: the happy path, a markdown-fenced response, malformed JSON,
+  the 400/413/503/502 branches, and that the prompt still frames user text as
+  untrusted data.
+- **`lib/*.test.ts`** cover the analyzer and the example library directly. One
+  test asserts no example copy contains em or en dashes, which enforces the
+  brand rule automatically.
+- `npx tsc --noEmit` reports errors in test files for missing vitest globals.
+  That is pre-existing and expected; filter with `grep -v "\.test\."`.
+
+---
+
 ## Working conventions observed in this project (carry these forward)
 
-- Every feature change: implement, then `npm run lint`, then `npm run build`,
-  then verify the actual behavior (preview browser locally, or curl/test
+- Every feature change: implement, then `npm run lint`, then `npm test -- --run`,
+  then `npm run build`, then verify the actual behavior (preview browser
+  locally, or curl/test
   production for AI-dependent behavior), then commit with a short imperative
   message, then push, then re-verify against the live URL.
 - Commits are created per logical change, not batched into giant commits.

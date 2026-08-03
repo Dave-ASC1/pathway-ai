@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Word temporary lock files
+~$*.docx
+
+# leftover unzip folder from docx verification
+report/_check/
+
+# session archives
+*.zip
+report/ziW2yYX8

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone Node scripts that build the .docx deliverables.
+    "create-assignment-doc*.js",
+    "report/**",
   ]),
 ]);
 

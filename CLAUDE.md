@@ -57,7 +57,10 @@ npm
 - `@anthropic-ai/sdk` — powers all five AI routes, model `claude-opus-4-8`
 - `vitest` + `@testing-library/react` + `jsdom` — unit tests
 
-**Not installed, and not planned:** Clerk, Prisma, NeonDB, shadcn/ui.
+- `shadcn` + `class-variance-authority` — installed but barely used, only
+  `components/ui/button.tsx` exists. Do not build out more of it without reason.
+
+**Not installed, and not planned:** Clerk, Prisma, NeonDB.
 
 ---
 

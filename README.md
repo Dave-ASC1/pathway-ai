@@ -4,26 +4,37 @@
 
 Pathway AI is a student-first career readiness platform that helps students improve resumes, discover realistic career paths, build skill roadmaps, and prepare for interviews.
 
-This repository contains the MVP implementation for the IST 440W capstone project. It includes a polished landing page, a dashboard workspace, and a working ATS-style resume checker powered by Claude AI with a local fallback.
+This repository contains the implementation for the IST 440W capstone project. All four modules are built and running against the Claude API, and the app requires no account and costs nothing to use.
 
-## Implemented Features
+## Features
 
-- Public landing page with Pathway AI branding and module overview.
-- Dashboard route at `/dashboard`.
-- Resume checker at `/resume-checker` — AI-powered via Claude API with local keyword-matching fallback.
-- Matched keyword and missing keyword detection.
-- Resume section checks for education, projects, skills, experience, and impact.
-- Student-focused strengths and improvement recommendations.
-- Screenshots of all working screens in `public/screenshots/`.
-- Responsive design for desktop and mobile.
+**Try an example** on every module fills the form with one of three realistic student profiles, so the app can be tested end to end without writing a resume or finding a job posting first. The profiles span a senior with an internship, a junior with projects but no internship, and a sophomore with no relevant experience.
 
-## Planned Features
+### ATS Resume Checker (`/resume-checker`)
+- Paste resume text or upload a PDF or DOCX.
+- AI analysis against a target job description, with a deterministic keyword-matching fallback if the AI call fails.
+- Match score, matched and missing keywords, per-section scoring (education, experience, projects, skills, impact), strengths, and specific improvements.
 
-- User authentication (Clerk).
-- Saved student profiles and resume history (NeonDB + Prisma).
-- Career Path Explorer.
-- Skill Gap Roadmap.
-- Mock Interview Coach.
+### Career Path Explorer (`/career-path`)
+- Three realistic career directions from a student's major, year, and interests.
+- Each path includes typical progression, skills to build, and a concrete first step.
+
+### Skill Gap Roadmap (`/skill-gap`)
+- Compares current skills against a target role.
+- Prioritized learning steps with reasoning, suggested resource type, and time estimates.
+
+### Mock Interview Coach (`/interview`)
+- Role-specific behavioral and technical questions.
+- Scored feedback per answer: what worked, what was missing, and a model answer.
+
+### Across the app
+- Results carry between modules (resume skills flow into the roadmap, the target role into the interview coach).
+- Results can be saved to the browser and revisited at `/saved`.
+- Responsive on desktop and mobile.
+
+## Deliberately Not Built
+
+Authentication (Clerk) and a database (NeonDB + Prisma) were planned early and intentionally dropped. Browser storage is used instead, which keeps the app free and sign-up free. This was a scoping decision, not an unfinished item.
 
 ## Tech Stack
 
@@ -68,13 +79,41 @@ npm run start
 npm run lint
 ```
 
+### Test
+
+```bash
+npm test -- --run
+```
+
+79 unit tests covering the API routes, the deterministic analyzer, and the module
+components. The Anthropic SDK is mocked, so the suite runs offline in a few
+seconds and makes no API calls.
+
 ## Main Routes
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Public landing page |
-| `/dashboard` | MVP student workspace |
-| `/resume-checker` | Working ATS-style resume checker |
+| `/` | Landing page and journey overview |
+| `/dashboard` | Student workspace with per-step progress |
+| `/resume-checker` | ATS-style resume checker |
+| `/career-path` | Career Path Explorer |
+| `/skill-gap` | Skill Gap Roadmap |
+| `/interview` | Mock Interview Coach |
+| `/saved` | Saved results |
+
+### API routes
+
+All AI calls are server-side, so the API key is never exposed to the browser.
+
+| Route | Purpose |
+| --- | --- |
+| `/api/analyze-resume` | Resume analysis (has a local fallback) |
+| `/api/career-path` | Career path generation |
+| `/api/skill-gap` | Roadmap generation |
+| `/api/interview/questions` | Interview question generation |
+| `/api/interview/evaluate` | Answer scoring and coaching |
+| `/api/interview/sample-answers` | Drafts example answers for the demo profiles |
+| `/api/parse-resume` | PDF, DOCX, and TXT text extraction (not AI) |
 
 ## How the Resume Checker Works
 
@@ -84,10 +123,18 @@ npm run lint
 4. If no API key is present or the call fails, a local keyword-matching fallback runs automatically.
 5. Results include: match score (0–100), matched keywords, missing keywords, section checks, strengths, and improvement recommendations.
 
-To enable Claude AI locally, add to `.env.local`:
+The other three modules follow the same server-side pattern, but return a clear
+error instead of falling back, since there is no meaningful non-AI version of
+generating interview questions or a learning roadmap.
+
+To enable AI locally, add to `.env.local`:
 ```
 ANTHROPIC_API_KEY=your_key_here
 ```
+
+Without a key, the resume checker still works via the fallback and the other
+modules report that the AI service is unavailable. The deployed app has the key
+configured, so all four modules are fully functional there.
 
 ## Documentation
 
@@ -112,12 +159,22 @@ The project management document includes:
 
 ## Screenshots
 
-Screenshots of all working screens are saved in `public/screenshots/`:
+Captured from the live site and saved in `public/screenshots/` at 2x for print.
+Regenerate them any time the UI changes:
 
-- `landing-page.png`
-- `dashboard.png`
-- `resume-checker-input.png`
-- `resume-checker-results.png`
+```bash
+npx tsx report/capture-screenshots.ts
+```
+
+| File | Shows |
+| --- | --- |
+| `landing-page.png` | Journey board landing page |
+| `dashboard.png` | Student workspace with step progress |
+| `resume-checker-input.png` | Resume and job description filled in, before analysis |
+| `resume-checker-results.png` | Score, radar, section bars, keywords, and recommendations |
+| `career-path-results.png` | Three generated career paths |
+| `skill-gap-results.png` | Prioritized learning roadmap |
+| `interview-questions.png` | Generated interview questions |
 
 ## GitHub Repository
 
@@ -125,11 +182,13 @@ https://github.com/Dave-ASC1/pathway-ai
 
 ## Self-Reflection Recording Guide
 
-For the recording deliverable, each member should explain one part of the project:
+This is a solo project. The recording covers:
 
-- Project goal and problem being solved.
-- Landing page and branding decisions.
-- Dashboard and user journey.
-- Resume checker logic and result interpretation.
+- Project goal and the problem being solved.
+- Landing page, branding, and the journey metaphor.
+- The four modules and how results carry between them.
+- Moving from keyword matching to real AI analysis.
 - Limitations and future improvements.
 - Project management artifacts and updated timeline.
+
+Talking points are in `SELF_REFLECTION.md`.

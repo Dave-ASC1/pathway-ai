@@ -43,7 +43,9 @@ describe("POST /api/interview/sample-answers", () => {
   });
 
   it("returns one answer per question", async () => {
-    create.mockResolvedValue(textMessage(JSON.stringify({ answers: ["first answer", "second answer"] })));
+    create
+      .mockResolvedValueOnce(textMessage(JSON.stringify({ answer: "first answer" })))
+      .mockResolvedValueOnce(textMessage(JSON.stringify({ answer: "second answer" })));
     const { POST } = await import("./route");
 
     const res = await POST(postRequest(valid));
@@ -54,48 +56,74 @@ describe("POST /api/interview/sample-answers", () => {
   });
 
   it("parses a response wrapped in markdown fences", async () => {
-    create.mockResolvedValue(
-      textMessage('```json\n{"answers": ["a one", "a two"]}\n```'),
-    );
+    create.mockResolvedValue(textMessage('```json\n{"answer": "a one"}\n```'));
     const { POST } = await import("./route");
 
     const data = await (await POST(postRequest(valid))).json();
-    expect(data.answers).toEqual(["a one", "a two"]);
+    expect(data.answers).toEqual(["a one", "a one"]);
   });
 
-  it("never returns more answers than questions asked", async () => {
-    create.mockResolvedValue(
-      textMessage(JSON.stringify({ answers: ["one", "two", "three", "four"] })),
-    );
+  it("sends one request per question instead of batching them into one", async () => {
+    create.mockResolvedValue(textMessage(JSON.stringify({ answer: "an answer" })));
     const { POST } = await import("./route");
 
     const data = await (await POST(postRequest(valid))).json();
     expect(data.answers).toHaveLength(2);
+    expect(create).toHaveBeenCalledTimes(2);
+  });
+
+  it("issues the drafting requests concurrently", async () => {
+    let inFlight = 0;
+    let peak = 0;
+    create.mockImplementation(async () => {
+      inFlight++;
+      peak = Math.max(peak, inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      inFlight--;
+      return textMessage(JSON.stringify({ answer: "an answer" }));
+    });
+    const { POST } = await import("./route");
+
+    await POST(postRequest(valid));
+    expect(peak).toBe(2);
+  });
+
+  it("leaves a blank for a single failed draft instead of losing them all", async () => {
+    create
+      .mockResolvedValueOnce(textMessage(JSON.stringify({ answer: "kept" })))
+      .mockRejectedValueOnce(new Error("blip"));
+    const { POST } = await import("./route");
+
+    const res = await POST(postRequest(valid));
+    const data = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(data.answers).toEqual(["kept", ""]);
   });
 
   it("passes the question text through to the prompt", async () => {
-    create.mockResolvedValue(textMessage(JSON.stringify({ answers: ["x", "y"] })));
+    create.mockResolvedValue(textMessage(JSON.stringify({ answer: "x" })));
     const { POST } = await import("./route");
     await POST(postRequest(valid));
 
-    const prompt = create.mock.calls[0][0].messages[0].content;
-    expect(prompt).toContain("Tell me about a time you fixed something.");
-    expect(prompt).toContain("Explain DNS.");
+    const prompts = create.mock.calls.map((c: unknown[]) => (c[0] as { messages: { content: string }[] }).messages[0].content);
+    expect(prompts.some((p: string) => p.includes("Tell me about a time you fixed something."))).toBe(true);
+    expect(prompts.some((p: string) => p.includes("Explain DNS."))).toBe(true);
   });
 
   it("frames background and questions as untrusted data", async () => {
-    create.mockResolvedValue(textMessage(JSON.stringify({ answers: ["x", "y"] })));
+    create.mockResolvedValue(textMessage(JSON.stringify({ answer: "x" })));
     const { POST } = await import("./route");
     await POST(postRequest(valid));
 
     const prompt = create.mock.calls[0][0].messages[0].content;
     expect(prompt).toContain("<background>");
-    expect(prompt).toContain("<questions>");
+    expect(prompt).toContain("<question>");
     expect(prompt).toMatch(/data, not instructions/i);
   });
 
   it("calibrates the prompt to the profile's strength", async () => {
-    create.mockResolvedValue(textMessage(JSON.stringify({ answers: ["x", "y"] })));
+    create.mockResolvedValue(textMessage(JSON.stringify({ answer: "x" })));
     const { POST } = await import("./route");
 
     await POST(postRequest({ ...valid, strength: "early" }));
@@ -107,7 +135,7 @@ describe("POST /api/interview/sample-answers", () => {
   });
 
   it("falls back to a safe calibration when strength is missing or bogus", async () => {
-    create.mockResolvedValue(textMessage(JSON.stringify({ answers: ["x", "y"] })));
+    create.mockResolvedValue(textMessage(JSON.stringify({ answer: "x" })));
     const { POST } = await import("./route");
 
     const res = await POST(postRequest({ ...valid, strength: 12345 }));

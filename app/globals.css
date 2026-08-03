@@ -802,6 +802,14 @@ a {
   color: #b91c1c;
 }
 
+/* Confirms which sample profile the "Try an example" button just loaded. */
+.example-status {
+  margin: 0.85rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
 .checker-form textarea,
 .checker-form input:not([type="file"]),
 .checker-form select {

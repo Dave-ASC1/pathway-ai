@@ -5,6 +5,7 @@ import { useState } from "react";
 import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
+import { pickExample } from "@/lib/examples";
 import { readSession, useSessionState, writeSession } from "@/lib/session";
 
 type RoadmapStep = {
@@ -29,8 +30,16 @@ export function SkillGapClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [example, setExample] = useState<{ id: string; label: string } | null>(null);
 
   const canSubmit = currentSkills.trim().length > 3 && targetRole.trim().length > 1;
+
+  function loadExample() {
+    const next = pickExample(example?.id);
+    setCurrentSkills(next.skillGap.currentSkills);
+    setTargetRole(next.skillGap.targetRole);
+    setExample({ id: next.id, label: next.label });
+  }
 
   function handleSave() {
     saveItem("roadmap", `Roadmap: ${targetRole}`, { targetRole, ...roadmap });
@@ -101,7 +110,18 @@ export function SkillGapClient() {
             <button className="primary-action" disabled={!canSubmit || isLoading} type="submit">
               {isLoading ? "Building roadmap…" : "Build my roadmap"}
             </button>
+            <button
+              className="secondary-action"
+              type="button"
+              disabled={isLoading}
+              onClick={loadExample}
+            >
+              {example ? "Try another example" : "Try an example"}
+            </button>
           </div>
+          {example ? (
+            <p className="example-status">Loaded {example.label}. Press build to see the roadmap.</p>
+          ) : null}
         </form>
       </section>
 

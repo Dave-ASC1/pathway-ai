@@ -7,181 +7,9 @@ import { PathwayLoader } from "../components/PathwayLoader";
 import { ScoreGauge } from "../components/ScoreGauge";
 import { SectionRadarChart } from "../components/SectionRadarChart";
 import { saveItem } from "@/lib/history";
+import { pickExample } from "@/lib/examples";
+import { type Analysis, analyzeResume } from "@/lib/resume-analysis";
 import { readSession, useSessionState, writeSession } from "@/lib/session";
-
-const sampleResume = `Jordan Miles
-IT Operations Analyst
-
-Summary
-Reliable IT Operations Analyst with hands-on experience keeping servers, network infrastructure, incidents, and tickets running smoothly in a fast paced support environment.
-
-Education
-Pennsylvania State University, B.S. Information Sciences and Technology
-Relevant coursework: network administration, systems support, and IT service management
-
-Experience
-IT Operations Analyst Intern, Keystone Health Systems, University Park, PA (May 2024 to present)
-Supported daily IT operations for a 400 person company, keeping systems and services online.
-Monitored servers and responded within minutes when servers reported a problem, which reduced downtime.
-Monitored network infrastructure and kept the network stable across three office locations.
-Took ownership of incidents from first report to close, tracking each ticket in the system and resolving more than 40 tickets a week.
-Logged every incident and closed tickets within same day service targets, which improved response time by 30%.
-Resolved hardware problems and resolved software problems for 200 plus users, increasing first call resolution.
-Wrote clear documentation for new systems so documentation stayed current for the whole support team.
-Configured Windows Server and supported Windows desktops across every department.
-Managed Active Directory accounts and maintained Active Directory groups for onboarding and offboarding.
-Supported Azure subscriptions and reviewed Azure billing monthly to control cloud costs.
-Ran backups on a schedule and verified backups regularly, achieving a 100 percent recovery success rate.
-Built automation scripts that reduced manual work and increased team output.
-Monitored security alerts and reviewed security logs weekly to protect company data.
-Prepared compliance reports and tracked compliance deadlines for every audit with zero missed findings.
-Followed change management steps and documented every change carefully before deployment.
-
-Volunteer Experience
-Volunteer IT Support, Local Community Center
-Supported the helpdesk queue on weekends and trained new helpdesk volunteers on ticketing tools.
-
-Projects
-Home Lab Automation: Built and designed a home lab environment to practice Windows Server, Active Directory, and Azure administration.
-Helpdesk Portfolio Project: Designed a small ticketing portfolio site to track tickets and incidents for a mock support team.
-
-Skills
-Windows Server, Active Directory, Azure, networking, ticketing systems, automation scripting, security monitoring, compliance reporting, backups, documentation, tools: PowerShell, Intune, ServiceNow, and other IT operations technologies`;
-
-const sampleJobDescription = `IT Operations Analyst
-
-We are hiring an IT Operations Analyst for our growing operations team. This analyst keeps daily technology operations running smoothly for the whole company.
-
-Responsibilities:
-Monitor servers and respond when servers report a problem. Monitor network infrastructure so the network stays stable. Manage incidents from open to close and log incidents in the tracker. Open tickets for new incidents and close tickets once resolved.
-
-Troubleshoot hardware problems and troubleshoot software problems for staff. Write clear documentation for new systems so documentation stays current.
-
-Configure Windows Server and support Windows desktops. Manage Active Directory accounts and maintain Active Directory groups. Support Azure subscriptions and review Azure billing.
-
-Run backups on a schedule and verify backups regularly. Build automation scripts and expand automation to save time.
-
-Monitor security alerts and review security logs. Prepare compliance reports and track compliance deadlines.
-
-Support the helpdesk queue and train new helpdesk staff. Follow change management steps and document every change carefully.`;
-
-const stopWords = new Set([
-  "about",
-  "after",
-  "also",
-  "and",
-  "are",
-  "but",
-  "can",
-  "for",
-  "from",
-  "has",
-  "have",
-  "into",
-  "our",
-  "that",
-  "the",
-  "this",
-  "with",
-  "will",
-  "you",
-  "your",
-]);
-
-type Analysis = {
-  score: number;
-  matchedKeywords: string[];
-  missingKeywords: string[];
-  strengths: string[];
-  improvements: string[];
-  sections: { label: string; score: number }[];
-};
-
-function tokenize(text: string) {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9+#.\s-]/g, " ")
-    .split(/\s+/)
-    .map((word) => word.trim())
-    .filter((word) => word.length > 3 && !stopWords.has(word));
-}
-
-function extractKeywords(jobDescription: string) {
-  const counts = new Map<string, number>();
-
-  tokenize(jobDescription).forEach((word) => {
-    counts.set(word, (counts.get(word) ?? 0) + 1);
-  });
-
-  return Array.from(counts.entries())
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, 18)
-    .map(([word]) => word);
-}
-
-// Scores a section 0-100 from how many of its trigger terms show up in the
-// resume, so the local (non-AI) fallback can still show a progress bar
-// instead of a flat yes/no.
-function sectionScore(text: string, terms: string[]): number {
-  const lower = text.toLowerCase();
-  const hits = terms.filter((term) => lower.includes(term)).length;
-  if (hits === 0) return 20;
-  return Math.min(100, Math.round(35 + (hits / terms.length) * 65));
-}
-
-function analyzeResume(resume: string, jobDescription: string): Analysis {
-  const keywords = extractKeywords(jobDescription);
-  const resumeWords = new Set(tokenize(resume));
-  const matchedKeywords = keywords.filter((keyword) => resumeWords.has(keyword));
-  const missingKeywords = keywords.filter((keyword) => !resumeWords.has(keyword));
-  const matchRatio = keywords.length ? matchedKeywords.length / keywords.length : 0;
-
-  const sections = [
-    { label: "Education", score: sectionScore(resume, ["education", "university", "college"]) },
-    { label: "Projects", score: sectionScore(resume, ["project", "portfolio", "built", "designed"]) },
-    { label: "Skills", score: sectionScore(resume, ["skills", "tools", "technologies"]) },
-    { label: "Experience", score: sectionScore(resume, ["experience", "intern", "work", "volunteer"]) },
-    { label: "Impact", score: sectionScore(resume, ["improved", "increased", "reduced", "%", "users"]) },
-  ];
-
-  const avgSectionScore = sections.reduce((sum, section) => sum + section.score, 0) / sections.length / 100;
-  const score = Math.round(matchRatio * 72 + avgSectionScore * 28);
-
-  const findSection = (label: string) => sections.find((section) => section.label === label)?.score ?? 0;
-
-  const strengths = [
-    matchedKeywords.length > 0
-      ? `The resume already matches ${matchedKeywords.length} important role keyword${matchedKeywords.length === 1 ? "" : "s"}.`
-      : "The resume has a foundation, but it needs more language from the target role.",
-    findSection("Projects") >= 60
-      ? "Project work is visible, which helps students with limited formal experience show proof of ability."
-      : "Adding project work would make the resume stronger for student-level roles.",
-    findSection("Skills") >= 60
-      ? "The skills section helps recruiters quickly understand the student's toolset."
-      : "A dedicated skills section would make the resume easier to scan.",
-  ];
-
-  const improvements = [
-    missingKeywords.length > 0
-      ? `Add truthful examples using missing keywords such as ${missingKeywords.slice(0, 5).join(", ")}.`
-      : "Keyword coverage is strong. Focus next on clearer outcomes and stronger bullets.",
-    findSection("Impact") >= 60
-      ? "Keep impact language visible and connect each result to a project or work activity."
-      : "Add measurable outcomes where possible, such as users supported, reports built, time saved, or errors reduced.",
-    findSection("Experience") >= 60
-      ? "Make sure experience bullets begin with action verbs and connect directly to the job description."
-      : "If formal work experience is limited, add class projects, volunteer work, or campus leadership as experience.",
-  ];
-
-  return {
-    score,
-    matchedKeywords,
-    missingKeywords,
-    strengths,
-    improvements,
-    sections,
-  };
-}
 
 // Pull the Skills section out of a pasted resume so it can be reused elsewhere.
 function extractSkillsSection(resumeText: string): string {
@@ -235,9 +63,20 @@ export function ResumeCheckerClient() {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [uploadedName, setUploadedName] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [example, setExample] = useState<{ id: string; label: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canAnalyze = resume.trim().length > 40 && jobDescription.trim().length > 40;
+
+  function loadExample() {
+    const next = pickExample(example?.id);
+    setResume(next.resumeChecker.resume);
+    setJobDescription(next.resumeChecker.jobDescription);
+    setExample({ id: next.id, label: next.label });
+    setUploadedName(null);
+    setUploadError(null);
+    runAnalysis(next.resumeChecker.resume, next.resumeChecker.jobDescription);
+  }
 
   async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -404,15 +243,12 @@ export function ResumeCheckerClient() {
               className="secondary-action"
               type="button"
               disabled={isLoading}
-              onClick={() => {
-                setResume(sampleResume);
-                setJobDescription(sampleJobDescription);
-                runAnalysis(sampleResume, sampleJobDescription);
-              }}
+              onClick={loadExample}
             >
-              Try an example
+              {example ? "Try another example" : "Try an example"}
             </button>
           </div>
+          {example ? <p className="example-status">Loaded {example.label}.</p> : null}
         </form>
       </section>
 

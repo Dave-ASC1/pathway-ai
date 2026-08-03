@@ -4,6 +4,7 @@ import { useState } from "react";
 import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
+import { getExample, pickExample } from "@/lib/examples";
 import { useSessionState } from "@/lib/session";
 
 const EMPTY_QUESTIONS: Question[] = [];
@@ -31,6 +32,8 @@ export function InterviewClient() {
   const [answers, setAnswers] = useSessionState<string[]>("interview:answers", EMPTY_ANSWERS);
   const [evaluations, setEvaluations] = useSessionState<Evaluation[]>("interview:evaluations", EMPTY_EVALS);
   const [phase, setPhase] = useSessionState<Phase>("interview:phase", "input");
+  // Session-scoped so the sample answer helper survives a page reload mid practice.
+  const [exampleId, setExampleId] = useSessionState("interview:exampleId", "");
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingLabel, setLoadingLabel] = useState("");
@@ -43,8 +46,7 @@ export function InterviewClient() {
     ? Math.round(evaluations.reduce((sum, e) => sum + e.score, 0) / evaluations.length)
     : 0;
 
-  async function handleGenerate(event: React.FormEvent) {
-    event.preventDefault();
+  async function generateQuestions(roleText: string) {
     setIsLoading(true);
     setLoadingLabel("Generating your interview questions…");
     setError(null);
@@ -52,7 +54,7 @@ export function InterviewClient() {
       const res = await fetch("/api/interview/questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
+        body: JSON.stringify({ role: roleText }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Something went wrong.");
@@ -65,6 +67,30 @@ export function InterviewClient() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleGenerate(event: React.FormEvent) {
+    event.preventDefault();
+    setExampleId("");
+    void generateQuestions(role);
+  }
+
+  // Fills the role and jumps straight to the questions, so a reviewer can reach
+  // the coaching output in one click instead of inventing a job posting first.
+  function loadExample() {
+    const next = pickExample(exampleId || undefined);
+    setRole(next.interview.role);
+    setExampleId(next.id);
+    void generateQuestions(next.interview.role);
+  }
+
+  // Assigns the loaded person's stories to whatever questions came back, so the
+  // evaluation step is reachable without typing out eight answers by hand.
+  function fillSampleAnswers() {
+    const source = getExample(exampleId);
+    if (!source) return;
+    const bank = source.interview.sampleAnswers;
+    setAnswers(questions.map((_, i) => bank[i % bank.length]));
   }
 
   async function handleEvaluate() {
@@ -96,6 +122,7 @@ export function InterviewClient() {
     setPhase("input");
     setError(null);
     setSaved(false);
+    setExampleId("");
   }
 
   function handleSave() {
@@ -139,6 +166,14 @@ export function InterviewClient() {
             <div className="checker-actions">
               <button className="primary-action" disabled={!canGenerate || isLoading} type="submit">
                 {isLoading ? "Generating…" : "Generate questions"}
+              </button>
+              <button
+                className="secondary-action"
+                type="button"
+                disabled={isLoading}
+                onClick={loadExample}
+              >
+                Try an example
               </button>
             </div>
           </form>
@@ -206,6 +241,11 @@ export function InterviewClient() {
               >
                 Get feedback ({answeredCount} answered)
               </button>
+              {exampleId ? (
+                <button className="secondary-action" type="button" onClick={fillSampleAnswers}>
+                  Fill sample answers
+                </button>
+              ) : null}
             </div>
           </div>
         ) : (

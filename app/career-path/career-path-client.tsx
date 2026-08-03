@@ -5,6 +5,7 @@ import { useState } from "react";
 import { JourneyBoard } from "../components/JourneyBoard";
 import { PathwayLoader } from "../components/PathwayLoader";
 import { saveItem } from "@/lib/history";
+import { pickExample } from "@/lib/examples";
 import { useSessionState, writeSession } from "@/lib/session";
 
 type CareerPath = {
@@ -34,8 +35,18 @@ export function CareerPathClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [example, setExample] = useState<{ id: string; label: string } | null>(null);
 
   const canSubmit = major.trim().length > 1 && interests.trim().length > 3;
+
+  function loadExample() {
+    const next = pickExample(example?.id);
+    setMajor(next.careerPath.major);
+    setYear(next.careerPath.year);
+    setInterests(next.careerPath.interests);
+    setTargetIndustries(next.careerPath.targetIndustries);
+    setExample({ id: next.id, label: next.label });
+  }
 
   function handleSave() {
     saveItem("career", major ? `Career paths for ${major}` : "Career paths", { major, paths });
@@ -123,7 +134,18 @@ export function CareerPathClient() {
             <button className="primary-action" disabled={!canSubmit || isLoading} type="submit">
               {isLoading ? "Generating paths…" : "Explore career paths"}
             </button>
+            <button
+              className="secondary-action"
+              type="button"
+              disabled={isLoading}
+              onClick={loadExample}
+            >
+              {example ? "Try another example" : "Try an example"}
+            </button>
           </div>
+          {example ? (
+            <p className="example-status">Loaded {example.label}. Press explore to see the paths.</p>
+          ) : null}
         </form>
       </section>
 

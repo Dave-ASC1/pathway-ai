@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { pdfItemsToText } from "@/lib/pdf-text";
 
 export const runtime = "nodejs";
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
 
+// We read the positioned text runs rather than unpdf's merged string, because
+// the merged form flattens every line break into a space. See lib/pdf-text.ts.
 async function parsePdf(bytes: Uint8Array): Promise<string> {
-  const { extractText, getDocumentProxy } = await import("unpdf");
+  const { extractTextItems, getDocumentProxy } = await import("unpdf");
   const pdf = await getDocumentProxy(bytes);
-  const { text } = await extractText(pdf, { mergePages: true });
-  return Array.isArray(text) ? text.join("\n") : text;
+  const { items } = await extractTextItems(pdf);
+  return pdfItemsToText(items);
 }
 
 async function parseDocx(buffer: Buffer): Promise<string> {
@@ -59,7 +62,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    text = text.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+    text = text
+      .replace(/\r\n/g, "\n")
+      .replace(/[ \t]+$/gm, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
 
     if (!text) {
       return NextResponse.json(

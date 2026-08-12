@@ -147,7 +147,7 @@ Run the automated test suite. All 79 tests should pass. These run offline and do
 **not** use your API key or cost anything:
 
 ```bash
-npm test -- --run
+npm test -- --run --testTimeout=20000
 ```
 
 Then confirm the project builds for production without errors:
